@@ -13,6 +13,8 @@ HEIGHT = 400
 FPS = 30
 # center of "map" screen portion
 MAP_CENTER = (WIDTH / 4, HEIGHT / 2)
+# list of border coords that stop actors
+MAP_BORDER = [0, 375]
 # middle of x axis
 WIDTH_CENTER = (WIDTH / 2)
 # middle of y axis

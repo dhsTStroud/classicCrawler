@@ -2,30 +2,74 @@
 import pygame as pg
 from settings import *
 
-# player sprite
-class Player(pg.sprite.Sprite):
+################################################################################
+
+# SUPERCLASSES
+
+class ActorSprite(object):
     def __init__(self, game, x, y):
-        self.groups = game.allSprites
-        pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = pg.image.load("assets/images/player.png")
-        # creates bounding box for sprite
-        self.rect = self.image.get_rect()
         self.x = x
         self.y = y
 
+    # every actor sprite needs a move method
+    def move(self):
+        raise NotImplementedError("ACTOR SPRITES NEED TO MOVE")
+
+    # checks for border in the direction the player is trying to move
+    def borderCheck(self, key):
+        retVar = True
+        # if the player is at the border, retVar is set to False
+        if (key == "a") and (self.rect.x <= min(MAP_BORDER)):
+            retVar = False
+        if (key == "d") and (self.rect.x >= max(MAP_BORDER)):
+            retVar = False
+        if (key == "w") and (self.rect.y <= min(MAP_BORDER)):
+            retVar = False
+        if (key == "s") and (self.rect.y >= max(MAP_BORDER)):
+            retVar = False
+        # if retVar is True at this point the player will be able to move
+        # else they are at the border and will not be able to go that way
+        return retVar
+
+    # sets the sprite at the right x and y coordinates
+    def update(self):
+        raise NotImplementedError("ACTOR SPRITES NEED UPDATE FUNCTIONS")
+
+################################################################################
+
+# SPRITE CLASSES
+
+# player sprite
+class Player(pg.sprite.Sprite, ActorSprite):
+    def __init__(self, game, x, y):
+        self.groups = game.allSprites
+        pg.sprite.Sprite.__init__(self, self.groups)
+        ActorSprite.__init__(self, game, x, y)
+        self.image = pg.image.load("assets/images/player.png")
+        # creates bounding box for sprite
+        self.rect = self.image.get_rect()
+
     # moves the sprite
     def move(self, key):
-        if key == "a":
-            self.x -= 1
-        elif key == "d":
-            self.x += 1
-        elif key == "w":
-            self.y -= 1
-        else:
-            self.y += 1
+        # checks for border
+        goodForGo = self.borderCheck(key)
+        # if no border, player is moved
+        if goodForGo:
+            if key == "a":
+                self.x -= 1
+            elif key == "d":
+                self.x += 1
+            elif key == "w":
+                self.y -= 1
+            else:
+                self.y += 1
 
+    # sets the sprite at the right x and y coordinates
     def update(self):
+        # kinda complicated to explain
+        # places tiles in multiples of tile size so that they line
+        # up at the right pixel number
         self.rect.x = self.x * TILE_SIZE
         self.rect.y = self.y * TILE_SIZE
 

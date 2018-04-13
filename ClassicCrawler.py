@@ -18,8 +18,16 @@ class Game(object):
         self.allSprites = pg.sprite.Group()
         # spritegroup for tiles
         self.tiles = pg.sprite.Group()
+        # spritegroup for UI menu sprites
+        self.menus = pg.sprite.Group()
         # creates a starting map (room 1)
         self.room1()
+        # creates the player UI
+        self.drawMenu()
+
+    def drawMenu(self):
+        uiImage = pg.image.load("assets/images/player_ui.png")
+        self.screen.blit(uiImage, (WIDTH_CENTER, 0))
 
     # first map (can and will make a class for maps later)
     def room1(self):
@@ -38,7 +46,7 @@ class Game(object):
         self.playing = True
         while self.playing:
             # game ticks at 30 frames a second
-            self.dt = self.clock.tick(FPS) / 100
+            self.fps = self.clock.tick(FPS) / 100
             self.events()
             self.update()
             self.drawMap()
@@ -65,7 +73,6 @@ class Game(object):
 
     # running draw method
     def drawMap(self):
-        self.screen.fill(BG_COLOR)
         self.tiles.draw(self.screen)
         self.drawGrid()
         self.allSprites.draw(self.screen)
