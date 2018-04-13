@@ -1,8 +1,13 @@
 # refer to pygame with "pg"
 import pygame as pg
+# other game files
 from settings import *
 from sprites import *
+from rooms import *
 
+################################################################################
+
+# Game class
 class Game(object):
     # sets up the GUI 
     def __init__(self):
@@ -20,25 +25,24 @@ class Game(object):
         self.tiles = pg.sprite.Group()
         # spritegroup for UI menu sprites
         self.menus = pg.sprite.Group()
-        # creates a starting map (room 1)
-        self.room1()
+        # creates the player sprite
+        self.player = Player(self, 1, 1)
+        # instantiates all rooms
+        self.setRoom()
         # creates the player UI
         self.drawMenu()
 
+    # creates the rightside user interface
     def drawMenu(self):
+        # loads the image (pg.image.load())
         uiImage = pg.image.load("assets/images/player_ui.png")
+        # screen.blit() plasters the image's pixels where you tell it to
+        # the picture is not really interactable, only a background
         self.screen.blit(uiImage, (WIDTH_CENTER, 0))
 
-    # first map (can and will make a class for maps later)
-    def room1(self):
-        for x in range(0, TILE_TO_GRID):
-            for y in range(0, TILE_TO_GRID):
-                GrassTile(self, x, y)
-        # places the player somewhere in the room
-        # (self, x, y)
-        # y should not be greater than 15 or less than 0
-        # x should not be greater than 
-        self.player = Player(self, 7, 15)
+    # sets the room (currently only one)
+    def setRoom(self):
+        Room_GrassTest(self)
             
     # game loop
     def run(self):

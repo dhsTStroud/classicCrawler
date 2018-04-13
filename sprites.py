@@ -1,11 +1,13 @@
 # refer to pygame as "pg"
 import pygame as pg
+# other game files
 from settings import *
 
 ################################################################################
 
 # SUPERCLASSES
 
+# base actor sprite with basic functionality and required functions
 class ActorSprite(object):
     def __init__(self, game, x, y):
         self.game = game
@@ -32,6 +34,11 @@ class ActorSprite(object):
         # else they are at the border and will not be able to go that way
         return retVar
 
+    # places the actor at specific coordinates
+    def place(self, x, y):
+        self.x = x
+        self.y = y
+
     # sets the sprite at the right x and y coordinates
     def update(self):
         raise NotImplementedError("ACTOR SPRITES NEED UPDATE FUNCTIONS")
@@ -56,12 +63,16 @@ class Player(pg.sprite.Sprite, ActorSprite):
         goodForGo = self.borderCheck(key)
         # if no border, player is moved
         if goodForGo:
+            # moves player left
             if key == "a":
                 self.x -= 1
+            # moves player right
             elif key == "d":
                 self.x += 1
+            # moves player up
             elif key == "w":
                 self.y -= 1
+            # moves player down
             else:
                 self.y += 1
 
@@ -73,7 +84,7 @@ class Player(pg.sprite.Sprite, ActorSprite):
         self.rect.x = self.x * TILE_SIZE
         self.rect.y = self.y * TILE_SIZE
 
-# class for grass tile
+# class for grass tile (might switch this out for a blit)
 class GrassTile(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.tiles
