@@ -6,6 +6,8 @@ from sprites import *
 
 ################################################################################
 
+# ROOM CLASSES
+
 # test room with only grass
 class Room_GrassTest(object):
     def __init__(self,game):
@@ -29,4 +31,4 @@ class Room_GrassTest(object):
     def placePlayer(self, player):
         # later the player will be placed toward the exit of the previous room
         # for now the character is placed at the bottom of the map
-        player.place(7, 15)
+        player.place(3,5)

@@ -13,8 +13,6 @@ HEIGHT = 400
 FPS = 30
 # center of "map" screen portion
 MAP_CENTER = (WIDTH / 4, HEIGHT / 2)
-# list of border coords that stop actors
-MAP_BORDER = [0, 375]
 # middle of x axis
 WIDTH_CENTER = (WIDTH / 2)
 # middle of y axis
@@ -28,8 +26,12 @@ BG_COLOR = DARK_GREY
 
 # useful grid settings
 # size of each tile
-TILE_SIZE = 25
+TILE_SIZE = 40
 GRID_WIDTH = (WIDTH / TILE_SIZE)
 GRID_HEIGHT = (HEIGHT / TILE_SIZE)
 # used when placing tiles to the grid
 TILE_TO_GRID = (WIDTH_CENTER / TILE_SIZE)
+# grid height and width dimensions
+GRID_DIMENSIONS = (HEIGHT / TILE_SIZE)
+# list of border coords that stop actors
+MAP_BORDER = [0, ((GRID_DIMENSIONS - 1) * TILE_SIZE)]

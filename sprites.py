@@ -2,10 +2,35 @@
 import pygame as pg
 # other game files
 from settings import *
+from random import randint
+
+################################################################################
+# USEFUL SPRITE CONSTANTS
+
+IMAGE_PATH = "assets/images/"
+# list comprehension makes so we only have to add the file name
+# to list for correct path. saves a lot of time typing
+# list of actor sprite images
+SPRITE_IMG_LIST = [(IMAGE_PATH+i+".png") for i in ["player", "ghoul", \
+                                                   "zombie", "skeleton"]]
+# list of tile sprite images
+TILE_IMG_LIST = [(IMAGE_PATH+i+".png") for i in ["tile_grass"]]
 
 ################################################################################
 
 # SUPERCLASSES
+
+class Tile(object):
+    def __init__(self, game, x, y):
+        self.game = game
+        # rotates tile so to make the map look more unique
+        self.image = pg.transform.rotate(self.image, float(90 * randint(0, 4)))
+        # creates bounding box
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILE_SIZE
+        self.rect.y = y * TILE_SIZE
 
 # base actor sprite with basic functionality and required functions
 class ActorSprite(object):
@@ -14,9 +39,24 @@ class ActorSprite(object):
         self.x = x
         self.y = y
 
-    # every actor sprite needs a move method
-    def move(self):
-        raise NotImplementedError("ACTOR SPRITES NEED TO MOVE")
+    # moves the sprite
+    def move(self, key):
+        # checks for border
+        goodForGo = self.borderCheck(key)
+        # if no border, player is moved
+        if goodForGo:
+            # moves player left
+            if key == "a":
+                self.x -= 1
+            # moves player right
+            elif key == "d":
+                self.x += 1
+            # moves player up
+            elif key == "w":
+                self.y -= 1
+            # moves player down
+            else:
+                self.y += 1
 
     # checks for border in the direction the player is trying to move
     def borderCheck(self, key):
@@ -39,9 +79,26 @@ class ActorSprite(object):
         self.x = x
         self.y = y
 
-    # sets the sprite at the right x and y coordinates
+    # update function doesn't seem to work when put in the
+    # superclass, will have to be unique for all instances
     def update(self):
         raise NotImplementedError("ACTOR SPRITES NEED UPDATE FUNCTIONS")
+
+# monster base class
+class Monster(ActorSprite):
+    def __init__(self, game, x, y):
+        self.groups = game.mobSprites
+        ActorSprite.__init__(self, game, x, y)
+
+    # monsters will autopath towards the player
+    def autoPath(self):
+        target = (self.game.player.x, self.game.player.y)
+        pass
+
+    # update function doesn't seem to work when put in the
+    # superclass, will have to be unique for all instances
+    def update(self):
+        ActorSprite.update()        
 
 ################################################################################
 
@@ -50,31 +107,14 @@ class ActorSprite(object):
 # player sprite
 class Player(pg.sprite.Sprite, ActorSprite):
     def __init__(self, game, x, y):
+        # adds self to appropriate spritelist in game
         self.groups = game.allSprites
         pg.sprite.Sprite.__init__(self, self.groups)
-        ActorSprite.__init__(self, game, x, y)
-        self.image = pg.image.load("assets/images/player.png")
+        # loads player image from image list
+        self.image = pg.image.load(SPRITE_IMG_LIST[0])
         # creates bounding box for sprite
         self.rect = self.image.get_rect()
-
-    # moves the sprite
-    def move(self, key):
-        # checks for border
-        goodForGo = self.borderCheck(key)
-        # if no border, player is moved
-        if goodForGo:
-            # moves player left
-            if key == "a":
-                self.x -= 1
-            # moves player right
-            elif key == "d":
-                self.x += 1
-            # moves player up
-            elif key == "w":
-                self.y -= 1
-            # moves player down
-            else:
-                self.y += 1
+        ActorSprite.__init__(self, game, x, y)
 
     # sets the sprite at the right x and y coordinates
     def update(self):
@@ -84,18 +124,18 @@ class Player(pg.sprite.Sprite, ActorSprite):
         self.rect.x = self.x * TILE_SIZE
         self.rect.y = self.y * TILE_SIZE
 
-# class for grass tile (might switch this out for a blit)
-class GrassTile(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
-        self.groups = game.tiles
-        pg.sprite.Sprite.__init__(self, self.groups)
-        self.game = game
-        self.image = pg.image.load("assets/images/tile_grass.png")
-        # creates bounding box
-        self.rect = self.image.get_rect()
-        self.x = x
-        self.y = y
-        self.rect.x = x * TILE_SIZE
-        self.rect.y = y * TILE_SIZE
-        
+################################################################################
 
+# TILE SPRITE CLASSES
+
+# class for grass tile (might switch this out for a blit)
+class GrassTile(pg.sprite.Sprite, Tile):
+    def __init__(self, game, x, y):
+        # adds self to appropriate spritelist in game
+        self.groups = game.tiles
+        # runs pygame inbuilt sprite class constructor
+        pg.sprite.Sprite.__init__(self, self.groups)
+        # sets unique image
+        self.image = pg.image.load(TILE_IMG_LIST[0])
+        # runs Tile superclass contructor
+        Tile.__init__(self, game, x, y)

@@ -21,6 +21,8 @@ class Game(object):
     def newGame(self):
         # spritegroup for sprites
         self.allSprites = pg.sprite.Group()
+        # spritegroup for monsters
+        self.mobSprites = pg.sprite.Group()
         # spritegroup for tiles
         self.tiles = pg.sprite.Group()
         # spritegroup for UI menu sprites
@@ -31,6 +33,8 @@ class Game(object):
         self.setRoom()
         # creates the player UI
         self.drawMenu()
+        # starts turns 'counter'
+        self.playerHasMoved = False
 
     # creates the rightside user interface
     def drawMenu(self):
@@ -52,6 +56,8 @@ class Game(object):
             # game ticks at 30 frames a second
             self.fps = self.clock.tick(FPS) / 100
             self.events()
+            while self.playerHasMoved == True:
+                pass
             self.update()
             self.drawMap()
 
