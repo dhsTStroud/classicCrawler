@@ -10,9 +10,12 @@ from sprites import *
 
 # test room with only grass
 class Room_GrassTest(object):
-    def __init__(self,game):
+    def __init__(self, game, difficulty=1):
+        self.game = game
         self.createFloor(game)
         self.placePlayer(game.player)
+        self.placeObstacles()
+        self.placeMobs(difficulty)
 
     # create the base floor for the room
     def createFloor(self, game):
@@ -32,3 +35,8 @@ class Room_GrassTest(object):
         # later the player will be placed toward the exit of the previous room
         # for now the character is placed at the bottom of the map
         player.place(3,5)
+
+    def placeMobs(self, num):
+        for n in range(num):
+            pass
+        Actor_Ghost(self.game, 3, 4)

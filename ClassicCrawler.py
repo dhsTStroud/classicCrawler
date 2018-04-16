@@ -28,7 +28,7 @@ class Game(object):
         # spritegroup for UI menu sprites
         self.menus = pg.sprite.Group()
         # creates the player sprite
-        self.player = Player(self, 1, 1)
+        self.player = Actor_Player(self, 1, 1)
         # instantiates all rooms
         self.setRoom()
         # creates the player UI
