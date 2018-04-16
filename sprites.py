@@ -11,16 +11,24 @@ IMAGE_PATH = "assets/images/"
 # list comprehension makes so we only have to add the file name
 # to list for correct path. saves a lot of time typing
 # list of actor sprite images
-SPRITE_IMG_LIST = [(IMAGE_PATH+i+".png") for i in ["player", "ghoul", \
-                                                   "zombie", "skeleton",\
-                                                   "ghost"]]
+ACTOR_IMG_LIST = [(IMAGE_PATH+"act_"+i+".png") for i in ["player", "ghoul",\
+                                                         "zombie", "skeleton",\
+                                                         "ghost"]]
+# list of slime sprite images
+SLIME_IMG_LIST = [(IMAGE_PATH+"act_slime_"+i+".png") for i in ["blue", "gold",\
+                                                               "green", "purple",\
+                                                               "red", "steel"]]
 # list of tile sprite images
-TILE_IMG_LIST = [(IMAGE_PATH+i+".png") for i in ["tile_grass"]]
+TILE_IMG_LIST = [(IMAGE_PATH+"tile_"+i+".png") for i in ["exit", "grass",\
+                                                         "dirt", "stone",]]
+# list of obsacle sprite images
+OBS_IMG_LIST = [(IMAGE_PATH+"obs_"+i+".png") for i in ["stump"]]
 
 ################################################################################
 
 # SUPERCLASSES
 
+# Tile superclass
 class Tile(object):
     def __init__(self, game, x, y):
         self.game = game
@@ -143,7 +151,7 @@ class Actor_Ghost(Monster):
 
 ################################################################################
 
-# TILE SPRITE CLASSES
+# TILE CLASSES
 
 # class for grass tile (might switch this out for a blit)
 class GrassTile(pg.sprite.Sprite, Tile):
@@ -153,6 +161,6 @@ class GrassTile(pg.sprite.Sprite, Tile):
         # runs pygame inbuilt sprite class constructor
         pg.sprite.Sprite.__init__(self, self.groups)
         # sets unique image
-        self.image = pg.image.load(TILE_IMG_LIST[0])
+        self.image = pg.image.load(TILE_IMG_LIST[1])
         # runs Tile superclass contructor
         Tile.__init__(self, game, x, y)
