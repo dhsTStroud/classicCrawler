@@ -20,7 +20,7 @@ class Game(object):
     # initialize all variables and setup a new game
     def newGame(self):
         # spritegroup for sprites
-        self.allSprites = pg.sprite.Group()
+        self.allActorSprites = pg.sprite.Group()
         # spritegroup for monsters
         self.mobSprites = pg.sprite.Group()
         # spritegroup for tiles
@@ -39,7 +39,7 @@ class Game(object):
     # creates the rightside user interface
     def drawMenu(self):
         # loads the image (pg.image.load())
-        uiImage = pg.image.load("assets/images/player_ui.png")
+        uiImage = pg.image.load(IMAGE_PATH + "ui_right_menu.png")
         # screen.blit() plasters the image's pixels where you tell it to
         # the picture is not really interactable, only a background
         self.screen.blit(uiImage, (WIDTH_CENTER, 0))
@@ -68,7 +68,7 @@ class Game(object):
     # update portion of game loop
     def update(self):
         # updates "allSprites" sprite group
-        self.allSprites.update()
+        self.allActorSprites.update()
 
     # draws the grid for the map portion of the screen
     def drawGrid(self):
@@ -85,7 +85,7 @@ class Game(object):
     def drawMap(self):
         self.tiles.draw(self.screen)
         self.drawGrid()
-        self.allSprites.draw(self.screen)
+        self.allActorSprites.draw(self.screen)
         # flips the display each time it's called
         # prevents lag
         pg.display.flip()

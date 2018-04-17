@@ -34,7 +34,7 @@ class Room_GrassTest(object):
     def placePlayer(self, player):
         # later the player will be placed toward the exit of the previous room
         # for now the character is placed at the bottom of the map
-        player.place(3,5)
+        player.place(3,6)
 
     def placeMobs(self, num):
         for n in range(num):
