@@ -37,8 +37,10 @@ class Game_Class(object):
 
     ############################################################################
 # Obtacle superclass
-class Obstacle(Game_Class):
+class Obstacle(Game_Class, pg.sprite.Sprite):
     def __init__(self, game, x, y, imgNum):
+        self.groups = game.obs_sprites
+        pg.sprite.Sprite.__init__(self, self.groups)
         Game_Class.__init__(self, game, x, y)
         # sets obstacle image
         self.image = pg.image.load(OBS_IMG_LIST[imgNum])
@@ -79,7 +81,7 @@ class Actor(Game_Class):
     def __init__(self, name, game, x=0, y=0):
         Game_Class.__init__(self, game, x, y)
         self.name = str(name)
-        self.boundary()
+        self.act_boundary()
 
     # moves the sprite
     # pass in 'w' for up
@@ -106,32 +108,33 @@ class Actor(Game_Class):
             else:
                 self.y += 1
         # recreates the object's bounds after every move
-        self.boundary()
+        self.act_boundary()
 
     # creates a collision if something is in the way
     def collide(self, key):
         # variable to be returned
         retVar = True
         # defines an area in movable tiles
-        for sprite in self.game.allActorSprites:
-            # object skips itself if in sprite group
-            if sprite == self:
-                continue
-            # if the current sprite's bounds are in the direction
-            # the current object is trying to move,
-            # then the movement is canceled
-            if sprite.bounds['c'] in self.bounds.values():
-                # for key, value pair in own bounds
-                for k, v in self.bounds.iteritems():
-                    # if target sprite is in target direction return false
-                    # false meaning you can't move in that direction
-                    if (sprite.bounds['c'] == v) and (key == k):
-                        # will initiate combat if an enemy is encountered
-                        if (sprite in self.enemies):
-                            # for now just changes return variable to false
-                            retVar = False
-                        else:
-                            retVar = False
+        for spriteGroup in self.game.allActorSprites, self.game.obs_sprites:
+            for sprite in spriteGroup:
+                # object skips itself if in sprite group
+                if sprite == self:
+                    continue
+                # if the current sprite's bounds are in the direction
+                # the current object is trying to move,
+                # then the movement is canceled
+                if sprite.bounds['c'] in self.bounds.values():
+                    # for key, value pair in own bounds
+                    for k, v in self.bounds.iteritems():
+                        # if target sprite is in target direction return false
+                        # false meaning you can't move in that direction
+                        if (sprite.bounds['c'] == v) and (key == k):
+                            # will initiate combat if an enemy is encountered
+                            if (sprite in self.enemies):
+                                # for now just changes return variable to false
+                                retVar = False
+                            else:
+                                retVar = False
         return retVar
 
     # checks for border in the direction the player is trying to move
@@ -148,7 +151,7 @@ class Actor(Game_Class):
         return retVar
 
     # defines interact range
-    def boundary(self):
+    def act_boundary(self):
         self.bounds = {'d':((self.x+1), self.y), 'w':(self.x, (self.y-1)),\
                        'a':((self.x-1), self.y), 's':(self.x, (self.y+1)),\
                        'c':(self.x, self.y)}
@@ -157,7 +160,7 @@ class Actor(Game_Class):
     def place(self, x, y):
         self.x = x
         self.y = y
-        self.boundary()
+        self.act_boundary()
 
     # returns the sprite's name if called to print
     def __str__(self):
@@ -183,11 +186,12 @@ class Monster(Actor, pg.sprite.Sprite):
         Actor.__init__(self, name, game, x, y)
         # sets the player as it's enemy
         self.enemies = [self.game.player]
+        self.autoPath()
 
     # monsters will autopath towards the player
     def autoPath(self):
-        target = (self.game.player.x, self.game.player.y)
-        pass
+        target = (self.enemies[0].bounds['c'])
+        self.act_boundary()
 
     # what to do when called to update
     def update(self):
@@ -205,7 +209,6 @@ class Actor_Player(pg.sprite.Sprite, Actor):
     def __init__(self, game, x, y):
         # adds self to appropriate spritelist in game
         self.groups = game.allActorSprites
-        print self.groups
         pg.sprite.Sprite.__init__(self, self.groups)
         # loads player image from image list
         self.image = pg.image.load(ACTOR_IMG_LIST[0])
@@ -248,8 +251,6 @@ class Tile_Grass(Tile):
 
     ############################################################################
 
-class Obs_Stump(Obstacle, pg.sprite.Sprite):
+class Obs_Stump(Obstacle):
     def __init__(self, game, x, y):
-        self.groups = game.obs_sprites
-        pg.sprite.Sprite(self, self.groups)
         Obstacle.__init__(self, game, x, y, 0)
