@@ -19,14 +19,7 @@ class Game(object):
     
     # initialize all variables and setup a new game
     def newGame(self):
-        # spritegroup for sprites
-        self.allActorSprites = pg.sprite.Group()
-        # spritegroup for monsters
-        self.mobSprites = pg.sprite.Group()
-        # spritegroup for tiles
-        self.tiles = pg.sprite.Group()
-        # spritegroup for UI menu sprites
-        self.menus = pg.sprite.Group()
+        self.spriteGroups()
         # creates the player sprite
         self.player = Actor_Player(self, 1, 1)
         # instantiates all rooms
@@ -35,6 +28,19 @@ class Game(object):
         self.drawMenu()
         # starts turns 'counter'
         self.playerHasMoved = False
+
+    def spriteGroups(self):
+        # spritegroup for sprites
+        self.allActorSprites = pg.sprite.Group()
+        # spritegroup for monsters
+        self.mob_sprites = pg.sprite.Group()
+        # spritegroup for tiles
+        self.tile_sprites = pg.sprite.Group()
+##        # spritegroup for UI menu sprites
+##        self.menus = pg.sprite.Group()
+        # spritegroup for obstacle sprites
+        self.obs_sprites = pg.sprite.Group()
+        
 
     # creates the rightside user interface
     def drawMenu(self):
@@ -83,7 +89,8 @@ class Game(object):
 
     # running draw method
     def drawMap(self):
-        self.tiles.draw(self.screen)
+        self.tile_sprites.draw(self.screen)
+        self.obs_sprites.draw(self.screen)
         self.drawGrid()
         self.allActorSprites.draw(self.screen)
         # flips the display each time it's called

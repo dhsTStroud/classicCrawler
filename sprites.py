@@ -28,28 +28,57 @@ OBS_IMG_LIST = [(IMAGE_PATH+"obs_"+i+".png") for i in ["stump"]]
 
 # SUPERCLASSES
 
-# Tile superclass
-class Tile(object):
+# game base class that all superclasses should inherit from
+class Game_Class(object):
     def __init__(self, game, x, y):
         self.game = game
-        # rotates tile so to make the map look more unique
-        self.image = pg.transform.rotate(self.image, float(90 * randint(0, 4)))
-        # creates bounding box
-        self.rect = self.image.get_rect()
         self.x = x
         self.y = y
+
+    ############################################################################
+# Obtacle superclass
+class Obstacle(Game_Class):
+    def __init__(self, game, x, y, imgNum):
+        Game_Class.__init__(self, game, x, y)
+        # sets obstacle image
+        self.image = pg.image.load(OBS_IMG_LIST[imgNum])
+        # creates sprite bounding box
+        self.rect = self.image.get_rect()
+        # places at correct pixel numbers per x and y
         self.rect.x = x * TILE_SIZE
         self.rect.y = y * TILE_SIZE
+        # bounds for actor interaction
+        self.bounds = {'c':(self.x, self.y)}
+
+    ############################################################################
+        
+# Tile superclass
+class Tile(Game_Class, pg.sprite.Sprite):
+    def __init__(self, game, x, y, imgNum):
+        Game_Class.__init__(self, game, x, y)
+        # sets tile image
+        self.image = pg.image.load(TILE_IMG_LIST[imgNum])
+        self.rotate()
+        # creates sprite bounding box
+        self.rect = self.image.get_rect()
+        # places at correct pixel numbers per x and y
+        self.rect.x = x * TILE_SIZE
+        self.rect.y = y * TILE_SIZE
+
+    # rotates tile so to make the map look more unique
+    def rotate(self):
+        # rotates the picture such that (image, degree of rotation)
+        # the picture is rotated in random intervals of 90 degrees
+        self.image = pg.transform.rotate(self.image, float(90 * randint(0, 4)))
+        
 
     ############################################################################
 
 # base actor sprite with basic functionality and required functions
-class Actor(object):
+class Actor(Game_Class):
     def __init__(self, name, game, x=0, y=0):
+        Game_Class.__init__(self, game, x, y)
         self.name = str(name)
-        self.game = game
-        self.x = x
-        self.y = y
         self.boundary()
 
     # moves the sprite
@@ -145,7 +174,7 @@ class Actor(object):
 class Monster(Actor, pg.sprite.Sprite):
     # image should be an integer refering to the respective image list above
     def __init__(self, name, game, x, y, imageNum):
-        self.groups = game.mobSprites, game.allActorSprites
+        self.groups = game.mob_sprites, game.allActorSprites
         pg.sprite.Sprite.__init__(self, self.groups)
         # loads respective image from image list
         self.image = pg.image.load(ACTOR_IMG_LIST[imageNum])
@@ -176,6 +205,7 @@ class Actor_Player(pg.sprite.Sprite, Actor):
     def __init__(self, game, x, y):
         # adds self to appropriate spritelist in game
         self.groups = game.allActorSprites
+        print self.groups
         pg.sprite.Sprite.__init__(self, self.groups)
         # loads player image from image list
         self.image = pg.image.load(ACTOR_IMG_LIST[0])
@@ -186,7 +216,7 @@ class Actor_Player(pg.sprite.Sprite, Actor):
     # sets the sprite at the right x and y coordinates
     def update(self):
         # for distinguishing enemy sprites from mundane sprites
-        self.enemies = self.game.mobSprites
+        self.enemies = self.game.mob_sprites
         # kinda complicated to explain
         # places tiles in multiples of tile size so that they line
         # up at the right pixel number
@@ -207,13 +237,19 @@ class Actor_Ghost(Monster):
 # TILE CLASSES
 
 # class for grass tile (might switch this out for a blit)
-class GrassTile(pg.sprite.Sprite, Tile):
+class Tile_Grass(Tile):
     def __init__(self, game, x, y):
         # adds self to appropriate spritelist in game
-        self.groups = game.tiles
+        self.groups = game.tile_sprites
         # runs pygame inbuilt sprite class constructor
         pg.sprite.Sprite.__init__(self, self.groups)
-        # sets unique image
-        self.image = pg.image.load(TILE_IMG_LIST[1])
         # runs Tile superclass contructor
-        Tile.__init__(self, game, x, y)
+        Tile.__init__(self, game, x, y, 1)
+
+    ############################################################################
+
+class Obs_Stump(Obstacle, pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.obs_sprites
+        pg.sprite.Sprite(self, self.groups)
+        Obstacle.__init__(self, game, x, y, 0)

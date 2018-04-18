@@ -3,6 +3,7 @@ import pygame as pg
 # other game files
 from settings import *
 from sprites import *
+from random import randint
 
 ################################################################################
 
@@ -12,23 +13,30 @@ from sprites import *
 class Room_GrassTest(object):
     def __init__(self, game, difficulty=1):
         self.game = game
-        self.createFloor(game)
+        self.createFloor()
         self.placePlayer(game.player)
         self.placeObstacles()
         self.placeMobs(difficulty)
 
     # create the base floor for the room
-    def createFloor(self, game):
+    def createFloor(self):
         for x in range(0, TILE_TO_GRID):
             for y in range(0, TILE_TO_GRID):
                 # pass each tile an x and y coordinate
                 # game parameter is for sprite grouping
-                GrassTile(game, x, y)
+                Tile_Grass(self.game, x, y)
 
     # places obstacles such as cave walls or rocks
     def placeObstacles(self):
-        pass
-
+        obstacles = 6
+        while obstacles > 0:
+            for x in range(0, TILE_TO_GRID, randint(1, 3)):
+                for y in range(0, TILE_TO_GRID, randint(1, 3)):
+                    chance = randint(0, 100)
+                    if chance >= 50:
+                        Obs_Stump(self.game, x, y)
+                        obstacles -= 1
+                        
     # places the player appropriately
     # this function will change later in the developement of the game
     def placePlayer(self, player):
