@@ -40,7 +40,8 @@ class Tile(object):
         self.y = y
         self.rect.x = x * TILE_SIZE
         self.rect.y = y * TILE_SIZE
-    
+
+    ############################################################################
 
 # base actor sprite with basic functionality and required functions
 class Actor(object):
@@ -80,6 +81,7 @@ class Actor(object):
 
     # creates a collision if something is in the way
     def collide(self, key):
+        # variable to be returned
         retVar = True
         # defines an area in movable tiles
         for sprite in self.game.allActorSprites:
@@ -87,11 +89,20 @@ class Actor(object):
             if sprite == self:
                 continue
             # if the current sprite's bounds are in the direction
-            # the current object is trying to move, then the movement is canceled
+            # the current object is trying to move,
+            # then the movement is canceled
             if sprite.bounds['c'] in self.bounds.values():
+                # for key, value pair in own bounds
                 for k, v in self.bounds.iteritems():
+                    # if target sprite is in target direction return false
+                    # false meaning you can't move in that direction
                     if (sprite.bounds['c'] == v) and (key == k):
-                        retVar = False
+                        # will initiate combat if an enemy is encountered
+                        if (sprite in self.enemies):
+                            # for now just changes return variable to false
+                            retVar = False
+                        else:
+                            retVar = False
         return retVar
 
     # checks for border in the direction the player is trying to move
@@ -128,27 +139,31 @@ class Actor(object):
     def update(self):
         raise NotImplementedError("ACTOR SPRITES NEED UPDATE FUNCTIONS")
 
+    ############################################################################
+
 # monster base class
 class Monster(Actor, pg.sprite.Sprite):
     # image should be an integer refering to the respective image list above
     def __init__(self, name, game, x, y, imageNum):
-        self.groups += game.mobSprites
+        self.groups = game.mobSprites, game.allActorSprites
         pg.sprite.Sprite.__init__(self, self.groups)
         # loads respective image from image list
         self.image = pg.image.load(ACTOR_IMG_LIST[imageNum])
         # creates the bounding box for the sprite
         self.rect = self.image.get_rect()
         Actor.__init__(self, name, game, x, y)
+        # sets the player as it's enemy
+        self.enemies = [self.game.player]
 
     # monsters will autopath towards the player
     def autoPath(self):
         target = (self.game.player.x, self.game.player.y)
         pass
 
-    # update function doesn't seem to work when put in the
-    # superclass, will have to be unique for all instances
+    # what to do when called to update
     def update(self):
-        self.enemies = self.game.player
+        # calculates the pixel representation of x and y
+        # if x = 3, then 3 * TILE_SIZE = where the image will be placed
         self.rect.x = self.x * TILE_SIZE
         self.rect.y = self.y * TILE_SIZE     
 
@@ -178,9 +193,13 @@ class Actor_Player(pg.sprite.Sprite, Actor):
         self.rect.x = self.x * TILE_SIZE
         self.rect.y = self.y * TILE_SIZE
 
+    ############################################################################
+
+# MOB CLASSES
+
+# ghost mob class
 class Actor_Ghost(Monster):
     def __init__(self, game, x, y):
-        self.groups = [game.allActorSprites]
         Monster.__init__(self, "Ghost", game, x, y, 4)
 
 ################################################################################
