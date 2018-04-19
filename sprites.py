@@ -31,11 +31,34 @@ OBS_IMG_LIST = [(IMAGE_PATH+"obs_"+i+".png") for i in ["stump"]]
 # game base class that all superclasses should inherit from
 class Game_Class(object):
     def __init__(self, game, x, y):
+        self.temp_groups = []
         self.game = game
         self.x = x
         self.y = y
 
+    # multiplies 
+    def placeAtTile(self):
+        # places at correct pixel numbers per x and y
+        self.rect.x = self.x * TILE_SIZE
+        self.rect.y = self.y * TILE_SIZE
+
+    # defines an interact range
+    # in the form of set boundaries
+    def boundary(self):
+        self.bounds = {'d':((self.x+1), self.y), 'w':(self.x, (self.y-1)),\
+                       'a':((self.x-1), self.y), 's':(self.x, (self.y+1)),\
+                       'c':(self.x, self.y)}
+                
+    # sets the sprite at the right x and y coordinates
+    def update(self):
+        # places tiles in multiples of tile size so that they line
+        # up at the right pixel number
+        self.rect.x = self.x * TILE_SIZE
+        self.rect.y = self.y * TILE_SIZE
+        
+
     ############################################################################
+
 # Obtacle superclass
 class Obstacle(Game_Class, pg.sprite.Sprite):
     def __init__(self, game, x, y, imgNum):
@@ -46,11 +69,16 @@ class Obstacle(Game_Class, pg.sprite.Sprite):
         self.image = pg.image.load(OBS_IMG_LIST[imgNum])
         # creates sprite bounding box
         self.rect = self.image.get_rect()
-        # places at correct pixel numbers per x and y
-        self.rect.x = x * TILE_SIZE
-        self.rect.y = y * TILE_SIZE
+        # places on grid
+        self.placeAtTile()
+        self.boundary()
+        self.update()
+
+    # creates object bounds
+    def boundary(self):
         # bounds for actor interaction
         self.bounds = {'c':(self.x, self.y)}
+        
 
     ############################################################################
         
@@ -58,14 +86,17 @@ class Obstacle(Game_Class, pg.sprite.Sprite):
 class Tile(Game_Class, pg.sprite.Sprite):
     def __init__(self, game, x, y, imgNum):
         Game_Class.__init__(self, game, x, y)
+        # adds self to appropriate spritelist in game
+        self.temp_groups.append(game.tile_sprites)
+        self.groups = self.temp_groups
+        # runs pygame inbuilt sprite class constructor
+        pg.sprite.Sprite.__init__(self, self.groups)
         # sets tile image
         self.image = pg.image.load(TILE_IMG_LIST[imgNum])
         self.rotate()
         # creates sprite bounding box
         self.rect = self.image.get_rect()
-        # places at correct pixel numbers per x and y
-        self.rect.x = x * TILE_SIZE
-        self.rect.y = y * TILE_SIZE
+        self.update()
 
     # rotates tile so to make the map look more unique
     def rotate(self):
@@ -77,11 +108,28 @@ class Tile(Game_Class, pg.sprite.Sprite):
     ############################################################################
 
 # base actor sprite with basic functionality and required functions
-class Actor(Game_Class):
-    def __init__(self, name, game, x=0, y=0):
+class Actor(Game_Class, pg.sprite.Sprite):
+    def __init__(self, game, x=0, y=0, name="ACTOR", group=None):
         Game_Class.__init__(self, game, x, y)
+        # set up groups
+        self.act_groups(group)
+        # Sprite constructor, pygame built in
+        pg.sprite.Sprite.__init__(self, self.groups)
+        # sets Actor name
         self.name = str(name)
-        self.act_boundary()
+        # creates initial boundaries
+        self.boundary()
+
+    # sets up Actor groups
+    def act_groups(self, extra=None):
+        # Actor sprites goes in allActorSprites
+        self.temp_groups.append(self.game.allActorSprites)
+        # adds any extra groups given as parameters
+        if extra != None:
+            self.temp_groups.append(extra)
+        # finally sets groups variable that will be given
+        # as a parameter to pygame.sprite.Sprite() constructor
+        self.groups = tuple(self.temp_groups)
 
     # moves the sprite
     # pass in 'w' for up
@@ -108,7 +156,7 @@ class Actor(Game_Class):
             else:
                 self.y += 1
         # recreates the object's bounds after every move
-        self.act_boundary()
+        self.boundary()
 
     # creates a collision if something is in the way
     def collide(self, key):
@@ -150,48 +198,60 @@ class Actor(Game_Class):
         # else they are at the border and will not be able to go that way
         return retVar
 
-    # defines interact range
-    def act_boundary(self):
-        self.bounds = {'d':((self.x+1), self.y), 'w':(self.x, (self.y-1)),\
-                       'a':((self.x-1), self.y), 's':(self.x, (self.y+1)),\
-                       'c':(self.x, self.y)}
-
     # places the actor at specific coordinates
     def place(self, x, y):
         self.x = x
         self.y = y
-        self.act_boundary()
+        self.boundary()
 
+    # MAGIC FUNCTIONS
+    
     # returns the sprite's name if called to print
     def __str__(self):
-        return self.name
+        return "{}_{}".format(self.actor_type, self.name)
 
-    # update function doesn't seem to work when put in the
-    # superclass, will have to be unique for all instances
-    def update(self):
-        raise NotImplementedError("ACTOR SPRITES NEED UPDATE FUNCTIONS")
+    # ABSTRACT METHODS
+    
+    # all actors must have a setEnemies method
+    def setEnemies(self):
+        raise NotImplementedError(\
+            "{} does not have a setEnemies method".format(self.name))
+
+##    # update function doesn't seem to work when put in the
+##    # superclass, will have to be unique for all instances
+##    def update(self):
+##        raise NotImplementedError("ACTOR SPRITES NEED UPDATE FUNCTIONS")
 
     ############################################################################
 
 # monster base class
-class Monster(Actor, pg.sprite.Sprite):
+class Monster(Actor):
+    # KEYWORDS AND CLASS VARIABLES
+    actor_type = "mob"
+    
     # image should be an integer refering to the respective image list above
-    def __init__(self, name, game, x, y, imageNum):
-        self.groups = game.mob_sprites, game.allActorSprites
-        pg.sprite.Sprite.__init__(self, self.groups)
+    def __init__(self, game, x, y, imgNum, name):
+        # adds self to game.mob_sprites sprite group
+        self.temp_groups = game.mob_sprites
+        Actor.__init__(self, game, x, y, name, self.temp_groups)
         # loads respective image from image list
-        self.image = pg.image.load(ACTOR_IMG_LIST[imageNum])
+        self.image = pg.image.load(ACTOR_IMG_LIST[imgNum])
         # creates the bounding box for the sprite
         self.rect = self.image.get_rect()
-        Actor.__init__(self, name, game, x, y)
+        self.autoPath()
+
+    # satisfies parent abstract method
+    # sets monster enemy as player when called
+    # should only be called in room classes
+    def setEnemies(self):
         # sets the player as it's enemy
         self.enemies = [self.game.player]
-        self.autoPath()
+        # sets the player as this sprite's target
+        target = (self.enemies[0].bounds['c'])
 
     # monsters will autopath towards the player
     def autoPath(self):
-        target = (self.enemies[0].bounds['c'])
-        self.act_boundary()
+        self.boundary()
 
     # what to do when called to update
     def update(self):
@@ -205,52 +265,108 @@ class Monster(Actor, pg.sprite.Sprite):
 # SPRITE CLASSES
 
 # player sprite
-class Actor_Player(pg.sprite.Sprite, Actor):
+class Actor_Player(Actor):
+    # KEYWORDS AND CLASS VARIABLES
+    # loads player image from image list
+    image = pg.image.load(ACTOR_IMG_LIST[0])
+    actor_type = "player"
     def __init__(self, game, x, y):
-        # adds self to appropriate spritelist in game
-        self.groups = game.allActorSprites
-        pg.sprite.Sprite.__init__(self, self.groups)
-        # loads player image from image list
-        self.image = pg.image.load(ACTOR_IMG_LIST[0])
         # creates bounding box for sprite
         self.rect = self.image.get_rect()
-        Actor.__init__(self, "Player", game, x, y)
+        Actor.__init__(self, game, x, y, "Player")
 
-    # sets the sprite at the right x and y coordinates
-    def update(self):
-        # for distinguishing enemy sprites from mundane sprites
-        self.enemies = self.game.mob_sprites
-        # kinda complicated to explain
-        # places tiles in multiples of tile size so that they line
-        # up at the right pixel number
-        self.rect.x = self.x * TILE_SIZE
-        self.rect.y = self.y * TILE_SIZE
+    # set or clear self.enemies
+    # either pass in a list of enemies or leave empty to clear the list
+    # clearing would be used for switching maps
+    # can also set enemies to "all" to set all mobs in mob_sprites as enemies
+    def setEnemies(self, varEnemies=None):
+        self.enemies = []
+        # if enemies != 1
+        if varEnemies != (None or "all"):
+            # add each enemy to the list
+            for enemy in varEnemies:
+                self.varEnemies.append(enemy)
+        # will set enemies to all existing mob sprites
+        if varEnemies == "all":
+            for enemy in self.game.mob_sprites:
+                # for distinguishing enemy sprites from mundane sprites
+                self.enemies.append(enemy)
 
     ############################################################################
 
 # MOB CLASSES
 
+# follows this format:
+# (if you copy paste this, just change the class name and image number)
+'''
+class _Mob_Template(Monster):
+    # KEYWORDS AND CLASS VARIABLES
+    # respective image index from TILE_IMAGE_LIST (see at top)
+    image = 4
+    
+    def __init__(self, game, x, y):
+        # passes in (self, game, x, y, imgNum, name="ACTOR")
+        Monster.__init__(self, game, x, y, self.image, "Ghost")
+'''
+
 # ghost mob class
 class Actor_Ghost(Monster):
+    # KEYWORDS AND CLASS VARIABLES
+    # respective image index from TILE_IMAGE_LIST (see at top)
+    image = 4
+    
     def __init__(self, game, x, y):
-        Monster.__init__(self, "Ghost", game, x, y, 4)
+        # passes in (self, game, x, y, imgNum, name="ACTOR")
+        Monster.__init__(self, game, x, y, self.image, "Ghost")
 
 ################################################################################
 
 # TILE CLASSES
 
-# class for grass tile (might switch this out for a blit)
-class Tile_Grass(Tile):
+# follows this format:
+# (if you copy paste this, just change the class name and image number)
+'''
+class _Tile_Template(Tile):
+    # KEYWORDS AND CLASS VARIABLES
+    # respective image index from TILE_IMAGE_LIST (see at top)
+    image = int()
+    
     def __init__(self, game, x, y):
-        # adds self to appropriate spritelist in game
-        self.groups = game.tile_sprites
-        # runs pygame inbuilt sprite class constructor
-        pg.sprite.Sprite.__init__(self, self.groups)
-        # runs Tile superclass contructor
-        Tile.__init__(self, game, x, y, 1)
+        # passes in (self, game, x, y, imgNum)
+        Tile.__init__(self, game, x, y, self.image)
+'''
+
+# class for grass tile
+class Tile_Grass(Tile):
+    # KEYWORDS AND CLASS VARIABLES
+    image = 1
+    
+    def __init__(self, game, x, y):
+        # passes in (self, game, x, y, imgNum)
+        Tile.__init__(self, game, x, y, self.image)
 
     ############################################################################
 
-class Obs_Stump(Obstacle):
+# OBSTACLE CLASSES
+
+# follows this format:
+# (if you copy paste this, just change the class name and image number)
+'''
+class _Obs_Template(Obstacle):
+    # KEYWORDS AND CLASS VARIABLES
+    # respective image index from OBS_IMAGE_LIST (see at top)
+    image = int()
+    
     def __init__(self, game, x, y):
+        # passes in (self, game, x, y, imgNum)
+        Obstacle.__init__(self, game, x, y, 0)
+'''
+
+# stump obstacle class
+class Obs_Stump(Obstacle):
+    # KEYWORDS AND CLASS VARIABLES
+    image = 0
+    
+    def __init__(self, game, x, y):
+        # passes in (self, game, x, y, imgNum)
         Obstacle.__init__(self, game, x, y, 0)

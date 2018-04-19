@@ -15,12 +15,26 @@ class Room_GrassTest(object):
         self.reserve()
         self.game = game
         self.createFloor()
-        self.placePlayer(game.player)
         self.placeMobs(difficulty)
+        self.placePlayer(game.player)
         # obstacles should be placed last because they do most accounting
         # for objects already placed
         self.placeObstacles()
+        self.setEnemies()
 
+    # assignes all actors their respective enemies
+    # should be used every time the character enters a new map
+    def setEnemies(self):
+        # cycles through all actors
+        for actor in self.game.allActorSprites:
+            # the player has many enemies
+            if actor == self.game.player:
+                actor.setEnemies("all")
+            else:
+                actor.setEnemies()
+
+    # reserves straight lines at random x and y coordinates
+    # such that the player won't get blocked in by obstacles
     def reserve(self):
         self.reserved = list()
         # x and y axis for below
