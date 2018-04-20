@@ -61,6 +61,11 @@ class Game_Class(object):
 
 # Obtacle superclass
 class Obstacle(Game_Class, pg.sprite.Sprite):
+    # KEYWORDS AND CLASS VARIABLES
+    spr_type = "obstacle"
+    
+    # imgnum will be an index in the corresponding 
+    # image direcory list found above
     def __init__(self, game, x, y, imgNum):
         self.groups = game.obs_sprites
         pg.sprite.Sprite.__init__(self, self.groups)
@@ -84,6 +89,11 @@ class Obstacle(Game_Class, pg.sprite.Sprite):
         
 # Tile superclass
 class Tile(Game_Class, pg.sprite.Sprite):
+    # KEYWORDS AND CLASS VARIABLES
+    spr_type = "tile"
+    
+    # imgnum will be an index in the corresponding 
+    # image direcory list found above
     def __init__(self, game, x, y, imgNum):
         Game_Class.__init__(self, game, x, y)
         # adds self to appropriate spritelist in game
@@ -109,6 +119,7 @@ class Tile(Game_Class, pg.sprite.Sprite):
 
 # base actor sprite with basic functionality and required functions
 class Actor(Game_Class, pg.sprite.Sprite):
+    # group is an optional extra for subclasses that require more than one
     def __init__(self, game, x=0, y=0, name="ACTOR", group=None):
         Game_Class.__init__(self, game, x, y)
         # set up groups
@@ -116,7 +127,7 @@ class Actor(Game_Class, pg.sprite.Sprite):
         # Sprite constructor, pygame built in
         pg.sprite.Sprite.__init__(self, self.groups)
         # sets Actor name
-        self.name = str(name)
+        self.name = name
         # creates initial boundaries
         self.boundary()
 
@@ -125,8 +136,10 @@ class Actor(Game_Class, pg.sprite.Sprite):
         # Actor sprites goes in allActorSprites
         self.temp_groups.append(self.game.allActorSprites)
         # adds any extra groups given as parameters
-        if extra != None:
-            self.temp_groups.append(extra)
+        if (extra != None):
+            # will add more than one group if extra is a list
+            for group in extra:
+                self.temp_groups.append(group)
         # finally sets groups variable that will be given
         # as a parameter to pygame.sprite.Sprite() constructor
         self.groups = tuple(self.temp_groups)
@@ -144,13 +157,13 @@ class Actor(Game_Class, pg.sprite.Sprite):
         # if no border, player is moved
         if (noBorder and noBlock):
             # moves player left
-            if key == "a":
+            if (key == "a"):
                 self.x -= 1
             # moves player right
-            elif key == "d":
+            elif (key == "d"):
                 self.x += 1
             # moves player up
-            elif key == "w":
+            elif (key == "w"):
                 self.y -= 1
             # moves player down
             else:
@@ -166,19 +179,19 @@ class Actor(Game_Class, pg.sprite.Sprite):
         for spriteGroup in self.game.allActorSprites, self.game.obs_sprites:
             for sprite in spriteGroup:
                 # object skips itself if in sprite group
-                if sprite == self:
+                if (sprite == self):
                     continue
                 # if the current sprite's bounds are in the direction
                 # the current object is trying to move,
                 # then the movement is canceled
-                if sprite.bounds['c'] in self.bounds.values():
+                if (sprite.bounds['c'] in self.bounds.values()):
                     # for key, value pair in own bounds
                     for k, v in self.bounds.iteritems():
                         # if target sprite is in target direction return false
                         # false meaning you can't move in that direction
                         if (sprite.bounds['c'] == v) and (key == k):
                             # will initiate combat if an enemy is encountered
-                            if (sprite in self.enemies):
+                            if (sprite.spr_type == self.enemies):
                                 # for now just changes return variable to false
                                 retVar = False
                             else:
@@ -210,24 +223,13 @@ class Actor(Game_Class, pg.sprite.Sprite):
     def __str__(self):
         return "{}_{}".format(self.actor_type, self.name)
 
-    # ABSTRACT METHODS
-    
-    # all actors must have a setEnemies method
-    def setEnemies(self):
-        raise NotImplementedError(\
-            "{} does not have a setEnemies method".format(self.name))
-
-##    # update function doesn't seem to work when put in the
-##    # superclass, will have to be unique for all instances
-##    def update(self):
-##        raise NotImplementedError("ACTOR SPRITES NEED UPDATE FUNCTIONS")
-
     ############################################################################
 
 # monster base class
 class Monster(Actor):
     # KEYWORDS AND CLASS VARIABLES
-    actor_type = "mob"
+    spr_type = "mob"
+    enemies = "player"
     
     # image should be an integer refering to the respective image list above
     def __init__(self, game, x, y, imgNum, name):
@@ -239,15 +241,6 @@ class Monster(Actor):
         # creates the bounding box for the sprite
         self.rect = self.image.get_rect()
         self.autoPath()
-
-    # satisfies parent abstract method
-    # sets monster enemy as player when called
-    # should only be called in room classes
-    def setEnemies(self):
-        # sets the player as it's enemy
-        self.enemies = [self.game.player]
-        # sets the player as this sprite's target
-        target = (self.enemies[0].bounds['c'])
 
     # monsters will autopath towards the player
     def autoPath(self):
@@ -269,28 +262,14 @@ class Actor_Player(Actor):
     # KEYWORDS AND CLASS VARIABLES
     # loads player image from image list
     image = pg.image.load(ACTOR_IMG_LIST[0])
-    actor_type = "player"
+    spr_type = "player"
+    name = "Player"
+    enemies = "mob"
+    
     def __init__(self, game, x, y):
         # creates bounding box for sprite
         self.rect = self.image.get_rect()
-        Actor.__init__(self, game, x, y, "Player")
-
-    # set or clear self.enemies
-    # either pass in a list of enemies or leave empty to clear the list
-    # clearing would be used for switching maps
-    # can also set enemies to "all" to set all mobs in mob_sprites as enemies
-    def setEnemies(self, varEnemies=None):
-        self.enemies = []
-        # if enemies != 1
-        if varEnemies != (None or "all"):
-            # add each enemy to the list
-            for enemy in varEnemies:
-                self.varEnemies.append(enemy)
-        # will set enemies to all existing mob sprites
-        if varEnemies == "all":
-            for enemy in self.game.mob_sprites:
-                # for distinguishing enemy sprites from mundane sprites
-                self.enemies.append(enemy)
+        Actor.__init__(self, game, x, y, self.name)
 
     ############################################################################
 
@@ -299,25 +278,65 @@ class Actor_Player(Actor):
 # follows this format:
 # (if you copy paste this, just change the class name and image number)
 '''
+# <mob name> mob class
 class _Mob_Template(Monster):
     # KEYWORDS AND CLASS VARIABLES
     # respective image index from TILE_IMAGE_LIST (see at top)
-    image = 4
+    image = int()
+    name = str()
     
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum, name="ACTOR")
-        Monster.__init__(self, game, x, y, self.image, "Ghost")
+        Monster.__init__(self, game, x, y, self.image, self.name)
 '''
+
 
 # ghost mob class
 class Actor_Ghost(Monster):
     # KEYWORDS AND CLASS VARIABLES
     # respective image index from TILE_IMAGE_LIST (see at top)
     image = 4
+    name = "Ghost"
     
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum, name="ACTOR")
-        Monster.__init__(self, game, x, y, self.image, "Ghost")
+        Monster.__init__(self, game, x, y, self.image, self.name)
+
+
+# zombie mob class
+class Actor_Zombie(Monster):
+    # KEYWORDS AND CLASS VARIABLES
+    # respective image index from TILE_IMAGE_LIST (see at top)
+    image = 2
+    name = "Zombie"
+    
+    def __init__(self, game, x, y):
+        # passes in (self, game, x, y, imgNum, name="ACTOR")
+        Monster.__init__(self, game, x, y, self.image, self.name)
+
+
+# ghoul mob class
+class Actor_Ghoul(Monster):
+    # KEYWORDS AND CLASS VARIABLES
+    # respective image index from TILE_IMAGE_LIST (see at top)
+    image = int(1)
+    name = "Ghoul"
+    
+    def __init__(self, game, x, y):
+        # passes in (self, game, x, y, imgNum, name="ACTOR")
+        Monster.__init__(self, game, x, y, self.image, self.name)
+
+
+# skeleton mob class
+class Actor_Skeleton(Monster):
+    # KEYWORDS AND CLASS VARIABLES
+    # respective image index from TILE_IMAGE_LIST (see at top)
+    image = int(3)
+    name = "Skeleton"
+    
+    def __init__(self, game, x, y):
+        # passes in (self, game, x, y, imgNum, name="ACTOR")
+        Monster.__init__(self, game, x, y, self.image, self.name)
 
 ################################################################################
 
@@ -340,6 +359,7 @@ class _Tile_Template(Tile):
 class Tile_Grass(Tile):
     # KEYWORDS AND CLASS VARIABLES
     image = 1
+    
     
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum)
