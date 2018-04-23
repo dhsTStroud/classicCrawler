@@ -4,6 +4,7 @@ import pygame as pg
 from settings import *
 from sprites import *
 from rooms import *
+from sprite_list import *
 
 ################################################################################
 

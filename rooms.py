@@ -2,6 +2,7 @@
 import pygame as pg
 # other game files
 from settings import *
+from sprite_list import *
 from sprites import *
 from random import randint
 
