@@ -191,7 +191,7 @@ class Actor(Game_Class, pg.sprite.Sprite):
                         # false meaning you can't move in that direction
                         if (sprite.bounds['c'] == v) and (key == k):
                             # will initiate combat if an enemy is encountered
-                            if (sprite.spr_type == self.enemies):
+                            if (self.enemies == sprite.spr_type):
                                 # for now just changes return variable to false
                                 retVar = False
                             else:
@@ -232,15 +232,19 @@ class Monster(Actor):
     enemies = "player"
     
     # image should be an integer refering to the respective image list above
-    def __init__(self, game, x, y, imgNum, name):
+    # if monster is a slime input 1 for slime parameter
+    def __init__(self, game, x, y, imgNum, name, slime=False):
         # adds self to game.mob_sprites sprite group
         self.temp_groups = game.mob_sprites
         Actor.__init__(self, game, x, y, name, self.temp_groups)
         # loads respective image from image list
-        self.image = pg.image.load(ACTOR_IMG_LIST[imgNum])
+        if (slime == True):
+            self.slime = slime
+            self.image = pg.image.load(SLIME_IMG_LIST[imgNum])
+        else:
+            self.image = pg.image.load(ACTOR_IMG_LIST[imgNum])
         # creates the bounding box for the sprite
         self.rect = self.image.get_rect()
-        self.autoPath()
 
     # monsters will autopath towards the player
     def autoPath(self):
@@ -251,4 +255,4 @@ class Monster(Actor):
         # calculates the pixel representation of x and y
         # if x = 3, then 3 * TILE_SIZE = where the image will be placed
         self.rect.x = self.x * TILE_SIZE
-        self.rect.y = self.y * TILE_SIZE     
+        self.rect.y = self.y * TILE_SIZE

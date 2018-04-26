@@ -2,7 +2,7 @@
 import pygame as pg
 # other game files
 from settings import *
-from random import *
+from random import randint
 from sprites import *
 
 ################################################################################
@@ -39,6 +39,7 @@ class _Mob_Template(Monster):
     
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum, name="ACTOR")
+        # if mob is a slime, put True after self.name
         Monster.__init__(self, game, x, y, self.image, self.name)
 '''
 
@@ -89,6 +90,18 @@ class Actor_Skeleton(Monster):
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum, name="ACTOR")
         Monster.__init__(self, game, x, y, self.image, self.name)
+        
+# blue slime mob class
+class Actor_Slime(Monster):
+    # KEYWORDS AND CLASS VARIABLES
+    # respective image index from TILE_IMAGE_LIST (see at top)
+    image = randint(0, len(SLIME_IMG_LIST)
+    name = "Slime"
+    
+    def __init__(self, game, x, y):
+        # passes in (self, game, x, y, imgNum, name="ACTOR")
+        # if mob is a slime, put True after self.name
+        Monster.__init__(self, game, x, y, self.image, self.name, True)
 
 ################################################################################
 
