@@ -55,6 +55,19 @@ class Game_Class(object):
         # up at the right pixel number
         self.rect.x = self.x * TILE_SIZE
         self.rect.y = self.y * TILE_SIZE
+
+    # sets up Actor groups
+    def act_groups(self, base, extra=None):
+        # Actor sprites goes in allActorSprites
+        self.temp_groups.append(base)
+        # adds any extra groups given as parameters
+        if (extra != None):
+            # will add more than one group if extra is a list
+            for group in extra:
+                self.temp_groups.append(group)
+        # finally sets groups variable that will be given
+        # as a parameter to pygame.sprite.Sprite() constructor
+        self.groups = tuple(self.temp_groups)
         
 
     ############################################################################
@@ -94,10 +107,11 @@ class Tile(Game_Class, pg.sprite.Sprite):
     
     # imgnum will be an index in the corresponding 
     # image direcory list found above
-    def __init__(self, game, x, y, imgNum):
+    def __init__(self, game, x, y, imgNum, group=None):
         Game_Class.__init__(self, game, x, y)
-        # adds self to appropriate spritelist in game
-        self.temp_groups.append(game.tile_sprites)
+        # set up groups
+        # first group is base group, second is extra
+        self.act_groups(self.game.tile_sprites, group)
         self.groups = self.temp_groups
         # runs pygame inbuilt sprite class constructor
         pg.sprite.Sprite.__init__(self, self.groups)
@@ -123,7 +137,8 @@ class Actor(Game_Class, pg.sprite.Sprite):
     def __init__(self, game, x=0, y=0, name="ACTOR", group=None):
         Game_Class.__init__(self, game, x, y)
         # set up groups
-        self.act_groups(group)
+        # first group is base group, second is extra
+        self.act_groups(self.game.allActorSprites, group)
         # Sprite constructor, pygame built in
         pg.sprite.Sprite.__init__(self, self.groups)
         # sets Actor name
@@ -136,19 +151,6 @@ class Actor(Game_Class, pg.sprite.Sprite):
             self.curHealth = self.maxHealth
         except:
             print "{} does not have maxHealth stat".format(self)
-
-    # sets up Actor groups
-    def act_groups(self, extra=None):
-        # Actor sprites goes in allActorSprites
-        self.temp_groups.append(self.game.allActorSprites)
-        # adds any extra groups given as parameters
-        if (extra != None):
-            # will add more than one group if extra is a list
-            for group in extra:
-                self.temp_groups.append(group)
-        # finally sets groups variable that will be given
-        # as a parameter to pygame.sprite.Sprite() constructor
-        self.groups = tuple(self.temp_groups)
 
     # moves the sprite
     # pass in 'w' for up

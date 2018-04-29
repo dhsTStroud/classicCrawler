@@ -123,18 +123,28 @@ class _Tile_Template(Tile):
     image = int()
     
     def __init__(self, game, x, y):
-        # passes in (self, game, x, y, imgNum)
+        # passes in (self, game, x, y, imgNum, group=None)
         Tile.__init__(self, game, x, y, self.image)
 '''
+
+
+# class for exit tile
+class Tile_Exit(Tile):
+    # KEYWORDS AND CLASS VARIABLES
+    image = 0
+
+    def __init__(self, game, x, y):
+        # passes in (self, game, x, y, imgNum, group=None)
+        Tile.__init__(self, game, x, y, self.image, game.special_tiles)
+
 
 # class for grass tile
 class Tile_Grass(Tile):
     # KEYWORDS AND CLASS VARIABLES
     image = 1
     
-    
     def __init__(self, game, x, y):
-        # passes in (self, game, x, y, imgNum)
+        # passes in (self, game, x, y, imgNum, group=None)
         Tile.__init__(self, game, x, y, self.image)
 
     ############################################################################

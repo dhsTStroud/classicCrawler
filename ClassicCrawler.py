@@ -43,6 +43,7 @@ class Game(object):
         self.mob_sprites = pg.sprite.Group()
         # spritegroup for tiles
         self.tile_sprites = pg.sprite.Group()
+        self.special_tiles = pg.sprite.Group()
 ##        # spritegroup for UI menu sprites
 ##        self.menus = pg.sprite.Group()
         # spritegroup for obstacle sprites
@@ -97,6 +98,7 @@ class Game(object):
     # running draw method
     def drawMap(self):
         self.tile_sprites.draw(self.screen)
+        self.special_tiles.draw(self.screen)
         self.obs_sprites.draw(self.screen)
         self.drawGrid()
         self.allActorSprites.draw(self.screen)

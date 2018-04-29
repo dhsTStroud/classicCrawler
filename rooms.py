@@ -16,11 +16,20 @@ class Room_GrassTest(object):
         self.reserve()
         self.game = game
         self.createFloor()
+        self.createExit()
         self.placeMobs(difficulty)
         self.placePlayer(game.player)
         # obstacles should be placed last because they do most accounting
         # for objects already placed
         self.placeObstacles()
+
+    # creates an exit on the map
+    def createExit(self):
+        # selects a random reserved tile to ensure accessibility
+        # spot will be a tuple as every item in self.reserved is a tuple
+        spot = self.reserved[randint(0, len(self.reserved)-1)]
+        # places the exit tile on that location
+        Tile_Exit(self.game, spot[0], spot[1])
 
     # reserves straight lines at random x and y coordinates
     # such that the player won't get blocked in by obstacles
