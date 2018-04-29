@@ -5,6 +5,12 @@ from settings import *
 from sprites import *
 from rooms import *
 from sprite_list import *
+try:
+    from breadboard import *
+    CONTROLLER = True
+except:
+    print "Controller disabled"
+    CONTROLLER = False
 
 ################################################################################
 
@@ -112,6 +118,11 @@ class Game(object):
                     self.player.move("w")
                 if event.key == pg.K_DOWN:
                     self.player.move("s")
+
+    # switches to fight mode
+    def startFight(self, enemy):
+        plyr = self.player
+        enmy = enemy
 
     # shows the start menu
     def startMenu(self):

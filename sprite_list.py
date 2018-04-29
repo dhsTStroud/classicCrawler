@@ -17,6 +17,7 @@ class Actor_Player(Actor):
     spr_type = "player"
     name = "Player"
     enemies = "mob"
+    maxHealth = 100
     
     def __init__(self, game, x, y):
         # creates bounding box for sprite
@@ -50,6 +51,7 @@ class Actor_Ghost(Monster):
     # respective image index from TILE_IMAGE_LIST (see at top)
     image = 4
     name = "Ghost"
+    maxHealth = 100
     
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum, name="ACTOR")
@@ -62,6 +64,7 @@ class Actor_Zombie(Monster):
     # respective image index from TILE_IMAGE_LIST (see at top)
     image = 2
     name = "Zombie"
+    maxHealth = 50
     
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum, name="ACTOR")
@@ -74,6 +77,7 @@ class Actor_Ghoul(Monster):
     # respective image index from TILE_IMAGE_LIST (see at top)
     image = int(1)
     name = "Ghoul"
+    maxHealth = 75
     
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum, name="ACTOR")
@@ -86,17 +90,20 @@ class Actor_Skeleton(Monster):
     # respective image index from TILE_IMAGE_LIST (see at top)
     image = int(3)
     name = "Skeleton"
+    maxHealth = 25
     
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum, name="ACTOR")
         Monster.__init__(self, game, x, y, self.image, self.name)
+
         
 # blue slime mob class
 class Actor_Slime(Monster):
     # KEYWORDS AND CLASS VARIABLES
     # respective image index from TILE_IMAGE_LIST (see at top)
-    image = randint(0, len(SLIME_IMG_LIST)
+    image = randint(0, len(SLIME_IMG_LIST))
     name = "Slime"
+    maxHealth = 25
     
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum, name="ACTOR")

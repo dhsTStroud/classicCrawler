@@ -130,6 +130,12 @@ class Actor(Game_Class, pg.sprite.Sprite):
         self.name = name
         # creates initial boundaries
         self.boundary()
+        self.living = True
+        try:
+            # actor health at given time
+            self.curHealth = self.maxHealth
+        except:
+            print "{} does not have maxHealth stat".format(self)
 
     # sets up Actor groups
     def act_groups(self, extra=None):
@@ -217,11 +223,29 @@ class Actor(Game_Class, pg.sprite.Sprite):
         self.y = y
         self.boundary()
 
-    # MAGIC FUNCTIONS
+    def heal(self, amount):
+        self.curhealth += amount
+        if self.curHealth > self.maxHealth:
+            self.curHealth = self.maxHealth
+
+    # takes damage
+    def takeDamage(self, amount):
+        self.curHealth -= amount
+        if self.curHealth < 0:
+            self.living = False
+        return self.living
+
+    # MAGIC METHODS
     
     # returns the sprite's name if called to print
     def __str__(self):
-        return "{}_{}".format(self.actor_type, self.name)
+        return "{}_{}".format(self.spr_type, self.name)
+
+    # ABSTRACT METHODS
+
+    # sets or adds levels depending on the actor
+    def levelUp(self):
+        raise NotImplementedError("{} needs levelUp method.".format(self))
 
     ############################################################################
 
