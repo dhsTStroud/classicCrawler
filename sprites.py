@@ -36,6 +36,28 @@ class Game_Class(object):
         self.x = x
         self.y = y
 
+    @property
+    def x(self):
+        return self._x
+    @x.setter
+    def x(self, value):
+        # performs range checking
+        if (value >= 0) and (value <= TILE_TO_GRID):
+            self._x = value
+        else:
+            self._x = 0
+
+    @property
+    def y(self):
+        return self._y
+    @y.setter
+    def y(self, value):
+        # performs range checking
+        if (value >= 0) and (value <= TILE_TO_GRID):
+            self._y = value
+        else:
+            self._y = 0
+
     # multiplies 
     def placeAtTile(self):
         # places at correct pixel numbers per x and y
@@ -56,15 +78,20 @@ class Game_Class(object):
         self.rect.x = self.x * TILE_SIZE
         self.rect.y = self.y * TILE_SIZE
 
-    # sets up Actor groups
-    def act_groups(self, base, extra=None):
-        # Actor sprites goes in allActorSprites
+    # sets up groups
+    def setup_groups(self, base, extra):
+        # adds to the existing base
         self.temp_groups.append(base)
         # adds any extra groups given as parameters
-        if (extra != None):
-            # will add more than one group if extra is a list
-            for group in extra:
-                self.temp_groups.append(group)
+        if extra != None:
+            # will add more than one group if extra is a list or tuple
+            if isinstance(extra, list or tuple):
+                for group in extra:
+                    self.temp_groups.append(group)
+            # otherwise will add single item
+            else:
+                self.temp_groups.append(extra)
+                    
         # finally sets groups variable that will be given
         # as a parameter to pygame.sprite.Sprite() constructor
         self.groups = tuple(self.temp_groups)
@@ -111,7 +138,8 @@ class Tile(Game_Class, pg.sprite.Sprite):
         Game_Class.__init__(self, game, x, y)
         # set up groups
         # first group is base group, second is extra
-        self.act_groups(self.game.tile_sprites, group)
+        self.groupon = group
+        self.setup_groups(self.game.tile_sprites, group)
         self.groups = self.temp_groups
         # runs pygame inbuilt sprite class constructor
         pg.sprite.Sprite.__init__(self, self.groups)
@@ -120,7 +148,13 @@ class Tile(Game_Class, pg.sprite.Sprite):
         self.rotate()
         # creates sprite bounding box
         self.rect = self.image.get_rect()
+        self.boundary()
         self.update()
+
+    # creates object bounds
+    def boundary(self):
+        # bounds for actor interaction
+        self.bounds = {'c':(self.x, self.y)}
 
     # rotates tile so to make the map look more unique
     def rotate(self):
@@ -138,7 +172,7 @@ class Actor(Game_Class, pg.sprite.Sprite):
         Game_Class.__init__(self, game, x, y)
         # set up groups
         # first group is base group, second is extra
-        self.act_groups(self.game.allActorSprites, group)
+        self.setup_groups(self.game.allActorSprites, group)
         # Sprite constructor, pygame built in
         pg.sprite.Sprite.__init__(self, self.groups)
         # sets Actor name

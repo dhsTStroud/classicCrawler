@@ -29,6 +29,8 @@ class Game(object):
         self.spriteGroups()
         # creates the player sprite
         self.player = Actor_Player(self, 1, 1)
+        # sets player at level 0
+        self.roomLevel = 0
         # instantiates all rooms
         self.setRoom()
         # creates the player UI
@@ -60,7 +62,8 @@ class Game(object):
 
     # sets the room (currently only one)
     def setRoom(self):
-        Room_GrassTest(self)
+        if self.roomLevel == 0:
+            currentRoom = BaseRoom(self)
             
     # game loop
     def run(self):
@@ -98,8 +101,8 @@ class Game(object):
     # running draw method
     def drawMap(self):
         self.tile_sprites.draw(self.screen)
-        self.special_tiles.draw(self.screen)
         self.obs_sprites.draw(self.screen)
+        self.special_tiles.draw(self.screen)
         self.drawGrid()
         self.allActorSprites.draw(self.screen)
         # flips the display each time it's called

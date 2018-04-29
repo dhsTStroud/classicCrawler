@@ -11,25 +11,31 @@ from random import randint
 # ROOM CLASSES
 
 # test room with only grass
-class Room_GrassTest(object):
+class BaseRoom(object):
     def __init__(self, game, difficulty=1):
         self.reserve()
         self.game = game
         self.createFloor()
-        self.createExit()
-        self.placeMobs(difficulty)
         self.placePlayer(game.player)
+        self.placeMobs(difficulty)
+        self.createExit()
         # obstacles should be placed last because they do most accounting
         # for objects already placed
         self.placeObstacles()
+        game.drawMap
 
     # creates an exit on the map
     def createExit(self):
         # selects a random reserved tile to ensure accessibility
         # spot will be a tuple as every item in self.reserved is a tuple
-        spot = self.reserved[randint(0, len(self.reserved)-1)]
+        while True:
+            spot = self.reserved[randint(0, len(self.reserved)-1)]
+            spot = (spot[0]-1, spot[1]-1)
+            if spot not in self.reserved:
+                break
         # places the exit tile on that location
-        Tile_Exit(self.game, spot[0], spot[1])
+        self.exit = Tile_Exit(self.game, spot[0], spot[1])
+        self.reserved.append(spot)
 
     # reserves straight lines at random x and y coordinates
     # such that the player won't get blocked in by obstacles
