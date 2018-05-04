@@ -22,7 +22,6 @@ class BaseRoom(object):
         # obstacles should be placed last because they do most accounting
         # for objects already placed
         self.placeObstacles()
-        game.drawMap
 
     # creates an exit on the map
     def createExit(self):

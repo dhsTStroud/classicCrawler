@@ -5,11 +5,11 @@ from settings import *
 from sprites import *
 from rooms import *
 from sprite_list import *
+# for testing when not on the pi
 try:
     from breadboard import *
     CONTROLLER = True
 except:
-    print "Controller disabled"
     CONTROLLER = False
 
 ################################################################################
@@ -23,6 +23,8 @@ class Game(object):
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
         pg.key.set_repeat(500, 100)
+        if CONTROLLER == True:
+            self.controller = Controller(self)
     
     # initialize all variables and setup a new game
     def newGame(self):
@@ -111,18 +113,22 @@ class Game(object):
 
     # catches all events
     def events(self):
+        button = None
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.quitGame()
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_LEFT:
-                    self.player.move("a")
+                    button = "a"
                 if event.key == pg.K_RIGHT:
-                    self.player.move("d")
+                    button = "d"
                 if event.key == pg.K_UP:
-                    self.player.move("w")
+                    button = "w"
                 if event.key == pg.K_DOWN:
-                    self.player.move("s")
+                    button = "s"
+        if CONTROLLER == True:
+            button = self.controller.movement()
+        return button
 
     # switches to fight mode
     def startFight(self, enemy):
