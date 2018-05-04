@@ -20,9 +20,7 @@ class Controller(object):
         #Setup input pins
         GPIO.setup(self.WASD, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.setup(self.AB, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-
-    
-
+        
     def healthbar(self, H, maxH):
         R = 0
         G = 0
@@ -43,9 +41,9 @@ class Controller(object):
         for i in range(num):
             GPIO.output(self.actions[i], True)
 
-    def movement(self, moves):
-        while (moves > 0):
+    def movement(self):
             retvar = None
+            retType = None
             #Move through the WASD keys
             for i in range(len(self.WASD)):
                 #Check if pressed
@@ -63,10 +61,8 @@ class Controller(object):
                     elif (self.WASD[i] == 19):
                         print "DOWN"
                         retvar = 's'
-                    self.change_action(moves-1)
-                    print "moves: {}".format(moves-1)
+                    retType = "key"
                     sleep(1)
-                    moves -= 1
             #move through AB buttons
             for i in range(len(self.AB)):
                 #Check if pressed
@@ -78,6 +74,8 @@ class Controller(object):
                     elif(self.AB[i]== 24):
                         retvar = 'k'
                     sleep(1)
+                    retType = "button"
+        return retvar, retType
 c = Controller()
 c.healthbar(100,100)
 c.change_action(3)
@@ -85,3 +83,4 @@ c.movement(3)
 sleep(1)
 print "ALL DONE"
 GPIO.cleanup()
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
