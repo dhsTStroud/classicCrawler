@@ -38,7 +38,7 @@ class Game(object):
         # creates the player UI
         self.drawMenu()
         # starts turns 'counter'
-        self.playerHasMoved = False
+        self.playerHasMoved = 0
 
     def spriteGroups(self):
         # spritegroup for sprites
@@ -75,8 +75,8 @@ class Game(object):
             # game ticks at 30 frames a second
             self.fps = self.clock.tick(FPS) / 100
             self.events()
-            while self.playerHasMoved == True:
-                pass
+            while self.playerHasMoved == 3:
+				self.playerHasMoved = 0
             self.update()
             self.drawMap()
 
