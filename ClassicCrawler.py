@@ -74,12 +74,22 @@ class Game(object):
         while self.playing:
             # game ticks at 30 frames a second
             self.fps = self.clock.tick(FPS) / 100
-            self.events()
-            while self.playerHasMoved == 3:
+            b,t = self.events()
+			self.buttonPress(b,t)
+			
+            if self.playerHasMoved == 2:
 				self.playerHasMoved = 0
+			self.controller.change_action(self.playerHasMoved) 
             self.update()
             self.drawMap()
 
+	#Executes button press
+	def buttonPress(b, t):
+		if (t):
+			self.playerHasMoved += 1
+			self.player.move(b)
+		else:
+			pass
     # closes the window
     def quitGame(self):
         pg.quit()
@@ -133,7 +143,7 @@ class Game(object):
                     buttonType = True
         if CONTROLLER == True:
             button, buttonType = self.controller.movement()
-        return button
+        return button, buttonType
 
     # switches to fight mode
     def startFight(self, enemy):

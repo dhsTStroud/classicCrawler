@@ -76,7 +76,6 @@ class Controller(object):
                     sleep(1)
                     retType = "button"
         return retvar, retType
-c = Controller()
 c.healthbar(100,100)
 c.change_action(3)
 c.movement(3)
