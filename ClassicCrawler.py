@@ -114,20 +114,25 @@ class Game(object):
     # catches all events
     def events(self):
         button = None
+        buttonType = False
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.quitGame()
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_LEFT:
                     button = "a"
+                    buttonType = True
                 if event.key == pg.K_RIGHT:
                     button = "d"
+                    buttonType = True
                 if event.key == pg.K_UP:
                     button = "w"
+                    buttonType = True
                 if event.key == pg.K_DOWN:
                     button = "s"
+                    buttonType = True
         if CONTROLLER == True:
-            button = self.controller.movement()
+            button, buttonType = self.controller.movement()
         return button
 
     # switches to fight mode
