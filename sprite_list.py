@@ -146,6 +146,24 @@ class Tile_Grass(Tile):
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum, group=None)
         Tile.__init__(self, game, x, y, self.image)
+		
+# class for grass tile
+class Tile_Dirt(Tile):
+    # KEYWORDS AND CLASS VARIABLES
+    image = 2
+    
+    def __init__(self, game, x, y):
+        # passes in (self, game, x, y, imgNum, group=None)
+        Tile.__init__(self, game, x, y, self.image)
+		
+# class for grass tile
+class Tile_Stone(Tile):
+    # KEYWORDS AND CLASS VARIABLES
+    image = 3
+    
+    def __init__(self, game, x, y):
+        # passes in (self, game, x, y, imgNum, group=None)
+        Tile.__init__(self, game, x, y, self.image)
 
     ############################################################################
 
