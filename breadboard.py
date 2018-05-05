@@ -9,7 +9,8 @@ class Controller(object):
     #     A   B
     AB = [22, 24]
     
-    def __init__(self):
+    def __init__(self, game):
+        self.game = game
         #LED and Button Pins
         GPIO.setmode(GPIO.BCM)
         
@@ -21,7 +22,9 @@ class Controller(object):
         GPIO.setup(self.WASD, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.setup(self.AB, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         
-    def healthbar(self, H, maxH):
+    def healthbar(self):
+        H = self.game.player.curHealth
+        maxH = self.game.player.maxHealth
         R = 0
         G = 0
         B = 0
@@ -34,52 +37,45 @@ class Controller(object):
         GPIO.output(self.RGB[0], R)
         GPIO.output(self.RGB[1], G)
         GPIO.output(self.RGB[2], B)
-
-    def change_action(self, num):
+        
+    def change_action(self, num = None):
         for i in self.actions:
             GPIO.output(self.actions, False)
         for i in range(num):
             GPIO.output(self.actions[i], True)
 
     def movement(self):
-            retvar = None
-            retType = None
-            #Move through the WASD keys
-            for i in range(len(self.WASD)):
-                #Check if pressed
-                if (GPIO.input(self.WASD[i]) == True):
-                    #Check which is pressed
-                    if (self.WASD[i] == 18):
-                        print "UP"
-                        retvar = 'w'
-                    elif (self.WASD[i] == 20):
-                        print "RIGHT"
-                        retvar = 'd'
-                    elif (self.WASD[i] == 21):
-                        print "LEFT"
-                        retvar = 'a'
-                    elif (self.WASD[i] == 19):
-                        print "DOWN"
-                        retvar = 's'
-                    retType = "key"
-                    sleep(1)
-            #move through AB buttons
-            for i in range(len(self.AB)):
-                #Check if pressed
-                if (GPIO.input(self.AB[i]) ==True):
-                    #Select button
-                    if (self.AB[i] == 22):
-                        retvar = 'j'
-                    #Deselect button
-                    elif(self.AB[i]== 24):
-                        retvar = 'k'
-                    sleep(1)
-                    retType = "button"
-        return retvar, retType
-c.healthbar(100,100)
-c.change_action(3)
-c.movement(3)
-sleep(1)
-print "ALL DONE"
-GPIO.cleanup()
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+        retvar = None
+        retType = None
+        #Move through the WASD keys
+        for i in range(len(self.WASD)):
+            #Check if pressed
+            if (GPIO.input(self.WASD[i]) == True):
+                #Check which is pressed
+                if (self.WASD[i] == 18):
+                    print "UP"
+                    retvar = 'w'
+                if (self.WASD[i] == 20):
+                    print "RIGHT"
+                    retvar = 'd'
+                if (self.WASD[i] == 21):
+                    print "LEFT"
+                    retvar = 'a'
+                if (self.WASD[i] == 19):
+                    print "DOWN"
+                    retvar = 's'
+                sleep(.25)
+                retType = True
+        #move through AB buttons
+        for i in range(len(self.AB)):
+            #Check if pressed
+            if (GPIO.input(self.AB[i]) == True):
+                #Select button
+                if (self.AB[i] == 22):
+                    retvar = 'j'
+                #Deselect button
+                elif(self.AB[i]== 24):
+                    retvar = 'k'
+                sleep(.25)
+                retType = False
+        return retvar, retType                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            

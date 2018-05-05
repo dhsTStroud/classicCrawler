@@ -6,11 +6,7 @@ from sprites import *
 from rooms import *
 from sprite_list import *
 # for testing when not on the pi
-try:
-    from breadboard import *
-    CONTROLLER = True
-except:
-    CONTROLLER = False
+from breadboard import *
 
 ################################################################################
 
@@ -23,8 +19,6 @@ class Game(object):
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
         pg.key.set_repeat(500, 100)
-        if CONTROLLER == True:
-            self.controller = Controller(self)
     
     # initialize all variables and setup a new game
     def newGame(self):
@@ -39,6 +33,7 @@ class Game(object):
         self.drawMenu()
         # starts turns 'counter'
         self.playerHasMoved = 0
+        self.controller = Controller(self)
 
     def spriteGroups(self):
         # spritegroup for sprites
@@ -74,22 +69,22 @@ class Game(object):
         while self.playing:
             # game ticks at 30 frames a second
             self.fps = self.clock.tick(FPS) / 100
-            b,t = self.events()
-			self.buttonPress(b,t)
-			
-            if self.playerHasMoved == 2:
-				self.playerHasMoved = 0
-			self.controller.change_action(self.playerHasMoved) 
+            self.controller.healthbar()
+            b, t = self.events()
+            self.buttonPress(b,t)
+            if self.playerHasMoved > 3:
+                self.playerHasMoved = 0
             self.update()
             self.drawMap()
 
-	#Executes button press
-	def buttonPress(b, t):
-		if (t):
-			self.playerHasMoved += 1
-			self.player.move(b)
-		else:
-			pass
+    #Executes button press
+    def buttonPress(self, b, t):
+        if (t):
+            if(self.player.collide(b) and self.player.borderCheck(b)):
+                self.playerHasMoved += 1
+                self.player.move(b)
+        else:
+            pass
     # closes the window
     def quitGame(self):
         pg.quit()
@@ -127,6 +122,7 @@ class Game(object):
         buttonType = False
         for event in pg.event.get():
             if event.type == pg.QUIT:
+                GPIO.cleanup()
                 self.quitGame()
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_LEFT:
@@ -141,8 +137,7 @@ class Game(object):
                 if event.key == pg.K_DOWN:
                     button = "s"
                     buttonType = True
-        if CONTROLLER == True:
-            button, buttonType = self.controller.movement()
+        button, buttonType = self.controller.movement()
         return button, buttonType
 
     # switches to fight mode
@@ -161,3 +156,5 @@ GAME.startMenu()
 while True:
     GAME.newGame()
     GAME.run()
+
+    
