@@ -6,7 +6,11 @@ from sprites import *
 from rooms import *
 from sprite_list import *
 # for testing when not on the pi
-from breadboard import *
+try:
+    from breadboard import *
+    CONTROLLER = True
+except:
+    CONTROLLER = False
 
 ################################################################################
 
@@ -33,7 +37,8 @@ class Game(object):
         self.drawMenu()
         # starts turns 'counter'
         self.playerHasMoved = 0
-        self.controller = Controller(self)
+        if CONTROLLER:
+            self.controller = Controller(self)
 
     def spriteGroups(self):
         # spritegroup for sprites
@@ -69,7 +74,8 @@ class Game(object):
         while self.playing:
             # game ticks at 30 frames a second
             self.fps = self.clock.tick(FPS) / 100
-            self.controller.healthbar()
+            if CONTROLLER:
+                self.controller.healthbar()
             b, t = self.events()
             self.buttonPress(b,t)
             if self.playerHasMoved > 3:
@@ -137,7 +143,8 @@ class Game(object):
                 if event.key == pg.K_DOWN:
                     button = "s"
                     buttonType = True
-        button, buttonType = self.controller.movement()
+        if CONTROLLER:
+            button, buttonType = self.controller.movement()
         return button, buttonType
 
     # switches to fight mode
