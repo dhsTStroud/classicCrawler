@@ -101,11 +101,11 @@ class Actor_Skeleton(Monster):
 class Actor_Slime(Monster):
     # KEYWORDS AND CLASS VARIABLES
     # respective image index from TILE_IMAGE_LIST (see at top)
-    image = randint(0, len(SLIME_IMG_LIST))
     name = "Slime"
     maxHealth = 25
     
     def __init__(self, game, x, y):
+        self.image = randint(0, len(SLIME_IMG_LIST)-1)
         # passes in (self, game, x, y, imgNum, name="ACTOR")
         # if mob is a slime, put True after self.name
         Monster.__init__(self, game, x, y, self.image, self.name, True)
@@ -131,6 +131,7 @@ class _Tile_Template(Tile):
 # class for exit tile
 class Tile_Exit(Tile):
     # KEYWORDS AND CLASS VARIABLES
+    spr_type = "exit"
     image = 0
 
     def __init__(self, game, x, y):
@@ -147,7 +148,7 @@ class Tile_Grass(Tile):
         # passes in (self, game, x, y, imgNum, group=None)
         Tile.__init__(self, game, x, y, self.image)
 		
-# class for grass tile
+# class for dirt tile
 class Tile_Dirt(Tile):
     # KEYWORDS AND CLASS VARIABLES
     image = 2
@@ -156,7 +157,7 @@ class Tile_Dirt(Tile):
         # passes in (self, game, x, y, imgNum, group=None)
         Tile.__init__(self, game, x, y, self.image)
 		
-# class for grass tile
+# class for stone tile
 class Tile_Stone(Tile):
     # KEYWORDS AND CLASS VARIABLES
     image = 3
@@ -179,7 +180,7 @@ class _Obs_Template(Obstacle):
     
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum)
-        Obstacle.__init__(self, game, x, y, 0)
+        Obstacle.__init__(self, game, x, y, self.image)
 '''
 
 # stump obstacle class
@@ -189,4 +190,24 @@ class Obs_Stump(Obstacle):
     
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum)
-        Obstacle.__init__(self, game, x, y, 0)
+        Obstacle.__init__(self, game, x, y, self.image)
+
+# dirt mound obstacle class
+class Obs_Dirtmound(Obstacle):
+    # KEYWORDS AND CLASS VARIABLES
+    # respective image index from OBS_IMAGE_LIST (see at top)
+    image = 1
+    
+    def __init__(self, game, x, y):
+        # passes in (self, game, x, y, imgNum)
+        Obstacle.__init__(self, game, x, y, self.image)
+
+# rock obstacle class
+class Obs_Rock(Obstacle):
+    # KEYWORDS AND CLASS VARIABLES
+    # respective image index from OBS_IMAGE_LIST (see at top)
+    image = 2
+    
+    def __init__(self, game, x, y):
+        # passes in (self, game, x, y, imgNum)
+        Obstacle.__init__(self, game, x, y, self.image)

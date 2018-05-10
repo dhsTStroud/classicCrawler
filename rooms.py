@@ -16,6 +16,7 @@ class BaseRoom(object):
                  difficulty=randint(3, 5)):
         self.enemyType = enemyType
         self.tileType = tileType
+        self.obsType = self.tileType
         self.reserve()
         self.game = game
         self.createFloor()
@@ -90,9 +91,16 @@ class BaseRoom(object):
             # adds current coordinates to used set
             used.add(randCoord)
             # creates a new stump at given coordinates
-            Obs_Stump(self.game, randCoord[0], randCoord[1])
+            self.obsInterpreter(randCoord[0], randCoord[1])
             # reduces amount of obstacles to place
             obstacles -= 1
+
+    # interprets which obstacle should be placed
+    def obsInterpreter(self, x, y):
+        if self.obsType == 0:
+            Obs_Stump(self.game, x, y)
+        else:
+            Obs_Rock(self.game, x, y)
 
     # returns random x and y coordinates in the form of a tuple
     # takes in a list of already used coodinates as well
@@ -162,6 +170,32 @@ class Room_Grass(BaseRoom):
 
     # game is passed in as self in main program
     # difficulty determines amount of enemies
-    def __init__(self, game, difficulty = randint(3, 4)):
+    def __init__(self, game, difficulty = 3):
+        BaseRoom.__init__(self, game, self.tile_type, self.mob_type, difficulty)
+
+# Dirt room
+class Room_Dirt(BaseRoom):
+    # CLASS VARIABLES
+    # tile will be dirt
+    tile_type = 1
+    # mobs will be skeletons
+    mob_type = 2
+
+    # game is passed in as self in main program
+    # difficulty determines amount of enemies
+    def __init__(self, game, difficulty = 4):
+        BaseRoom.__init__(self, game, self.tile_type, self.mob_type, difficulty)
+
+# Stone room
+class Room_Stone(BaseRoom):
+    # CLASS VARIABLES
+    # tile will be dirt
+    tile_type = 2
+
+    # game is passed in as self in main program
+    # difficulty determines amount of enemies
+    def __init__(self, game, difficulty = randint(4, 5)):
+        # mob types will be random
+        self.mob_type = randint(0, 3)
         BaseRoom.__init__(self, game, self.tile_type, self.mob_type, difficulty)
             

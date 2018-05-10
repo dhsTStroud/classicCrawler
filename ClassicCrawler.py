@@ -11,6 +11,8 @@ try:
     CONTROLLER = True
 except:
     CONTROLLER = False
+    # alt-4 if testing controller functionality
+##    CONTROLLER = True
 
 ################################################################################
 
@@ -31,7 +33,8 @@ class Game(object):
         self.player = Actor_Player(self, 1, 1)
         # sets player at level 0
         self.roomLevel = 0
-        # instantiates all rooms
+        # instantiates rooms
+        self.roomLevel = 0
         self.setRoom()
         # creates the player UI
         self.drawMenu()
@@ -52,7 +55,14 @@ class Game(object):
 ##        self.menus = pg.sprite.Group()
         # spritegroup for obstacle sprites
         self.obs_sprites = pg.sprite.Group()
-        
+
+    # empties all sprite groups
+    def clearSpriteGroups(self):
+        self.allActorSprites.empty()
+        self.mob_sprites.empty()
+        self.tile_sprites.empty()
+        self.special_tiles.empty()
+        self.obs_sprites.empty()
 
     # creates the rightside user interface
     def drawMenu(self):
@@ -62,10 +72,23 @@ class Game(object):
         # the picture is not really interactable, only a background
         self.screen.blit(uiImage, (WIDTH_CENTER, 0))
 
+    # clears the room
+    def clearRoom(self):
+        # preserves the player
+        player = self.player
+        self.clearSpriteGroups()
+        self.allActorSprites.add(player)
+
     # sets the room (currently only one)
     def setRoom(self):
-        if self.roomLevel == 0:
-            currentRoom = Room_Grass(self)
+        self.clearRoom()
+        self.roomLevel += 1
+        if self.roomLevel == 1:
+            self.currentRoom = Room_Grass(self)
+        elif self.roomLevel == 2:
+            self.currentRoom = Room_Dirt(self)
+        else:
+            self.currentRoom = Room_Stone(self)
             
     # game loop
     def run(self):
@@ -128,7 +151,8 @@ class Game(object):
         buttonType = False
         for event in pg.event.get():
             if event.type == pg.QUIT:
-                GPIO.cleanup()
+                if CONTROLLER:
+                    GPIO.cleanup()
                 self.quitGame()
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_LEFT:

@@ -22,7 +22,8 @@ SLIME_IMG_LIST = [(IMAGE_PATH+"act_slime_"+i+".png") for i in ["blue", "gold",\
 TILE_IMG_LIST = [(IMAGE_PATH+"tile_"+i+".png") for i in ["exit", "grass",\
                                                          "dirt", "stone",]]
 # list of obsacle sprite images
-OBS_IMG_LIST = [(IMAGE_PATH+"obs_"+i+".png") for i in ["stump"]]
+OBS_IMG_LIST = [(IMAGE_PATH+"obs_"+i+".png") for i in ["stump", "dirtmound",\
+                                                       "rock"]]
 
 ################################################################################
 
@@ -112,12 +113,18 @@ class Obstacle(Game_Class, pg.sprite.Sprite):
         Game_Class.__init__(self, game, x, y)
         # sets obstacle image
         self.image = pg.image.load(OBS_IMG_LIST[imgNum])
+        self.flipImage()
         # creates sprite bounding box
         self.rect = self.image.get_rect()
         # places on grid
         self.placeAtTile()
         self.boundary()
         self.update()
+
+    def flipImage(self):
+        amount = randint(0, 10)
+        for i in range(amount):
+            self.image = pg.transform.flip(self.image, True, False)
 
     # creates object bounds
     def boundary(self):
@@ -218,7 +225,8 @@ class Actor(Game_Class, pg.sprite.Sprite):
         # variable to be returned
         retVar = True
         # defines an area in movable tiles
-        for spriteGroup in self.game.allActorSprites, self.game.obs_sprites:
+        for spriteGroup in self.game.allActorSprites, self.game.obs_sprites,\
+            self.game.special_tiles:
             for sprite in spriteGroup:
                 # object skips itself if in sprite group
                 if (sprite == self):
@@ -236,6 +244,9 @@ class Actor(Game_Class, pg.sprite.Sprite):
                             if (self.enemies == sprite.spr_type):
                                 # for now just changes return variable to false
                                 retVar = False
+                            elif (self == self.game.player) and\
+                                 (sprite.spr_type == "exit"):
+                                self.game.setRoom()
                             else:
                                 retVar = False
         return retVar
