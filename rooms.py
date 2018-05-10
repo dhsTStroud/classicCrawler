@@ -99,6 +99,8 @@ class BaseRoom(object):
     def obsInterpreter(self, x, y):
         if self.obsType == 0:
             Obs_Stump(self.game, x, y)
+        elif self.obsType == 1:
+            Obs_Dirtmound(self.game, x, y)
         else:
             Obs_Rock(self.game, x, y)
 
