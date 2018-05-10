@@ -76,19 +76,24 @@ class Game(object):
     def clearRoom(self):
         # preserves the player
         player = self.player
+        # clears all sprite groups
         self.clearSpriteGroups()
+        # adds the player back to the appropriate sprite group
         self.allActorSprites.add(player)
 
     # sets the room (currently only one)
     def setRoom(self):
         self.clearRoom()
         self.roomLevel += 1
+        # starting area is grass
         if self.roomLevel == 1:
-            self.currentRoom = Room_Grass(self)
+            self.currentRoom = Room_Grass(self, (0,6))
+        # second level is dirt
         elif self.roomLevel == 2:
-            self.currentRoom = Room_Dirt(self)
+            self.currentRoom = Room_Dirt(self, self.currentRoom.exitCoord)
+        # the rest of the game is stone
         else:
-            self.currentRoom = Room_Stone(self)
+            self.currentRoom = Room_Stone(self, self.currentRoom.exitCoord)
             
     # game loop
     def run(self):
@@ -98,22 +103,31 @@ class Game(object):
             # game ticks at 30 frames a second
             self.fps = self.clock.tick(FPS) / 100
             if CONTROLLER:
+                # updates controller health
                 self.controller.healthbar()
+            # button pressed and button type are returned
+            # (movement or action types)
             b, t = self.events()
+            # presses the corresponding button
             self.buttonPress(b,t)
             if self.playerHasMoved > 3:
                 self.playerHasMoved = 0
             self.update()
             self.drawMap()
 
-    #Executes button press
+    # executes button press
+    # takes in a button and it's type
     def buttonPress(self, b, t):
+        # if type is true, a movement key was pressed
         if (t):
+            # as long as the player didn't just run into something
             if(self.player.collide(b) and self.player.borderCheck(b)):
+                # a movement is consumed
                 self.playerHasMoved += 1
                 self.player.move(b)
         else:
             pass
+        
     # closes the window
     def quitGame(self):
         pg.quit()

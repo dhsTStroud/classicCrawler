@@ -247,6 +247,7 @@ class Actor(Game_Class, pg.sprite.Sprite):
                             elif (self == self.game.player) and\
                                  (sprite.spr_type == "exit"):
                                 self.game.setRoom()
+                                retVar = False
                             else:
                                 retVar = False
         return retVar

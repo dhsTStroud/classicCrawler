@@ -12,11 +12,14 @@ from random import randint
 
 # test room with only grass
 class BaseRoom(object):
-    def __init__(self, game, tileType, enemyType=randint(0,4), \
+    def __init__(self, game, tileType, entrance=(6,0), enemyType=randint(0,4), \
                  difficulty=randint(3, 5)):
+        # instance variables are instantiated
         self.enemyType = enemyType
         self.tileType = tileType
         self.obsType = self.tileType
+        self.entrance = tuple(entrance)
+        # the map is created
         self.reserve()
         self.game = game
         self.createFloor()
@@ -38,6 +41,7 @@ class BaseRoom(object):
                 break
         # places the exit tile on that location
         self.exit = Tile_Exit(self.game, spot[0], spot[1])
+        self.exitCoord = (self.exit.x, self.exit.y)
         self.reserved.append(spot)
 
     # reserves straight lines at random x and y coordinates
@@ -45,7 +49,7 @@ class BaseRoom(object):
     def reserve(self):
         self.reserved = list()
         # x and y axis for below
-        ranX = randint(1, TILE_TO_GRID-2)
+        ranX = self.entrance[0]
         ranY = randint(1, TILE_TO_GRID-2)
         # reserves space such that the player won't get walled 
         # in or out of an area
@@ -128,7 +132,7 @@ class BaseRoom(object):
     def placePlayer(self, player):
         # later the player will be placed toward the exit of the previous room
         # for now the character is placed at the bottom of the map
-        player.place(3,6)
+        player.place(self.entrance[0],self.entrance[1])
         # reserves this spot for the player
         self.reserved.append(player.bounds['c'])
 
@@ -172,8 +176,9 @@ class Room_Grass(BaseRoom):
 
     # game is passed in as self in main program
     # difficulty determines amount of enemies
-    def __init__(self, game, difficulty = 3):
-        BaseRoom.__init__(self, game, self.tile_type, self.mob_type, difficulty)
+    def __init__(self, game, entrance, difficulty = 3):
+        BaseRoom.__init__(self, game, self.tile_type, entrance, \
+                          self.mob_type, difficulty)
 
 # Dirt room
 class Room_Dirt(BaseRoom):
@@ -185,8 +190,9 @@ class Room_Dirt(BaseRoom):
 
     # game is passed in as self in main program
     # difficulty determines amount of enemies
-    def __init__(self, game, difficulty = 4):
-        BaseRoom.__init__(self, game, self.tile_type, self.mob_type, difficulty)
+    def __init__(self, game, entrance, difficulty = 4):
+        BaseRoom.__init__(self, game, self.tile_type, entrance, \
+                          self.mob_type, difficulty)
 
 # Stone room
 class Room_Stone(BaseRoom):
@@ -196,8 +202,9 @@ class Room_Stone(BaseRoom):
 
     # game is passed in as self in main program
     # difficulty determines amount of enemies
-    def __init__(self, game, difficulty = randint(4, 5)):
+    def __init__(self, game, entrance, difficulty = randint(4, 5)):
         # mob types will be random
         self.mob_type = randint(0, 3)
-        BaseRoom.__init__(self, game, self.tile_type, self.mob_type, difficulty)
+        BaseRoom.__init__(self, game, self.tile_type, entrance, \
+                          self.mob_type, difficulty)
             
