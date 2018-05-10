@@ -65,7 +65,7 @@ class Game(object):
     # sets the room (currently only one)
     def setRoom(self):
         if self.roomLevel == 0:
-            currentRoom = BaseRoom(self)
+            currentRoom = Room_Grass(self)
             
     # game loop
     def run(self):

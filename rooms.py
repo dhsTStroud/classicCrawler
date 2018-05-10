@@ -12,7 +12,10 @@ from random import randint
 
 # test room with only grass
 class BaseRoom(object):
-    def __init__(self, game, difficulty=1):
+    def __init__(self, game, tileType, enemyType=randint(0,4), \
+                 difficulty=randint(3, 5)):
+        self.enemyType = enemyType
+        self.tileType = tileType
         self.reserve()
         self.game = game
         self.createFloor()
@@ -60,7 +63,16 @@ class BaseRoom(object):
             for y in range(0, TILE_TO_GRID):
                 # pass each tile an x and y coordinate
                 # game parameter is for sprite grouping
-                Tile_Grass(self.game, x, y)
+                self.tileInterpreter(self.tileType, x, y)
+
+    # interprets which tile should be placed
+    def tileInterpreter(self, tileType, x, y):
+        if tileType == 0:
+            Tile_Grass(self.game, x, y)
+        elif tileType == 1:
+            Tile_Dirt(self.game, x, y)
+        else:
+            Tile_Stone(self.game, x, y)
 
     # places obstacles such as cave walls or rocks
     def placeObstacles(self):
@@ -73,27 +85,33 @@ class BaseRoom(object):
         used = set()
         # while there are still obstacles to place
         while obstacles > 0:
-            for x in range(randint(0,3), TILE_TO_GRID, \
-                           randint(randint(1,2), 7)):
-                for y in range(randint(0,3), TILE_TO_GRID, \
-                               randint(randint(1,2), 4)):
-                    if tuple((x, y)) not in used:
-                        # gives the obstacle a 50% chance to be placed
-                        chance = randint(0, 100)
-                        # skips over reserved coordinates
-                        if (x, y) in self.reserved:
-                            break
-                        # keeps the loop from overplacing
-                        if obstacles <= 0:
-                            break
-                        # places the obstacle if chance > 50%
-                        if chance >= 50:
-                            # adds current coordinates to used set
-                            used.add(tuple((x, y)))
-                            # creates a new stump at given coordinates
-                            Obs_Stump(self.game, x, y)
-                            # reduces amount of obstacles to place
-                            obstacles -= 1
+            # creates a random (x, y) coordinate as a tuple
+            randCoord = self.randoCoord(used)
+            # adds current coordinates to used set
+            used.add(randCoord)
+            # creates a new stump at given coordinates
+            Obs_Stump(self.game, randCoord[0], randCoord[1])
+            # reduces amount of obstacles to place
+            obstacles -= 1
+
+    # returns random x and y coordinates in the form of a tuple
+    # takes in a list of already used coodinates as well
+    def randoCoord(self, used=[]):
+        # return variable
+        coord = None
+        # continues until a valid coordinate is found
+        while True:
+            # random x coordinates are created
+            randX = randint(0, TILE_TO_GRID-1)
+            randY = randint(0, TILE_TO_GRID-1)
+            # then stored as a tuple
+            coord = (randX, randY)
+            # skips if coord is previously reserved
+            if (coord in self.reserved) or (coord in used):
+                continue
+            # otherwise returns the random coordinate
+            else:
+                return coord
                         
     # places the player appropriately
     # this function will change later in the developement of the game
@@ -106,9 +124,44 @@ class BaseRoom(object):
 
     # will place the mobs throughout the map
     def placeMobs(self, num):
-        # for now only places one mob
-        # will be developed futher in the future
-        for mob in range(1):
-            currentMob = Actor_Ghost(self.game, 3, 4)
+        # set of already used coordinates
+        used = set()
+        for mob in range(num):
+            # creates a random (x,y) coordinate as a tuple
+            randCoord = self.randoCoord(used)
+            used.add(randCoord)
+            currentMob = self.enemyInterpreter(randCoord[0], randCoord[1], self.enemyType)
             # adds currentMob to reserved placement list
             self.reserved.append(currentMob.bounds['c'])
+
+    # takes an int, x, and y, and returns a mob at (x, y) coordinates based on int given
+    def enemyInterpreter(self, x, y, enType):
+        # return variable will be a mob, set to None for initialization
+        retMob = None
+        if enType == 0:
+            retMob = Actor_Ghoul(self.game, x, y)
+        elif enType == 1:
+            retMob = Actor_Zombie(self.game, x, y)
+        elif enType == 2:
+            retMob = Actor_Skeleton(self.game, x, y)
+        elif enType == 3:
+            retMob = Actor_Ghost(self.game, x, y)
+        else:
+            retMob = Actor_Slime(self.game, x, y)
+        return retMob
+
+####################################################################################################
+
+# Grass room
+class Room_Grass(BaseRoom):
+    # CLASS VARIABLES
+    # tile will be grass
+    tile_type = 0
+    # mobs will all be slimes
+    mob_type = 4
+
+    # game is passed in as self in main program
+    # difficulty determines amount of enemies
+    def __init__(self, game, difficulty = randint(3, 4)):
+        BaseRoom.__init__(self, game, self.tile_type, self.mob_type, difficulty)
+            
