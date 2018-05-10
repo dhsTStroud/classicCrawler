@@ -111,6 +111,8 @@ class Game(object):
             # presses the corresponding button
             self.buttonPress(b,t)
             if self.playerHasMoved > 3:
+                for mob in self.mob_sprites:
+                    mob.autoPath()
                 self.playerHasMoved = 0
             self.update()
             self.drawMap()
@@ -201,5 +203,3 @@ GAME.startMenu()
 while True:
     GAME.newGame()
     GAME.run()
-
-    

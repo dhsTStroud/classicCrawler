@@ -207,4 +207,24 @@ class Room_Stone(BaseRoom):
         self.mob_type = randint(0, 3)
         BaseRoom.__init__(self, game, self.tile_type, entrance, \
                           self.mob_type, difficulty)
-            
+
+    # takes an int, x, and y, and returns a mob at (x, y) coordinates based on int given
+    def enemyInterpreter(self, x, y, enType):
+        # mob types will be random
+        enType = randint(0, 3)
+        # return variable will be a mob, set to None for initialization
+        retMob = None
+        if enType == 0:
+            retMob = Actor_Ghoul(self.game, x, y)
+        elif enType == 1:
+            retMob = Actor_Zombie(self.game, x, y)
+        elif enType == 2:
+            retMob = Actor_Skeleton(self.game, x, y)
+        elif enType == 3:
+            retMob = Actor_Ghost(self.game, x, y)
+        else:
+            retMob = Actor_Slime(self.game, x, y)
+        return retMob
+
+
+    
