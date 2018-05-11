@@ -242,6 +242,7 @@ class Actor(Game_Class, pg.sprite.Sprite):
                         if (sprite.bounds['c'] == v) and (key == k):
                             # will initiate combat if an enemy is encountered
                             if (self.enemies == sprite.spr_type):
+								self.game.battleUI(sprite)
                                 # for now just changes return variable to false
                                 retVar = False
                             elif (self == self.game.player) and\
@@ -328,3 +329,14 @@ class Monster(Actor):
         # if x = 3, then 3 * TILE_SIZE = where the image will be placed
         self.rect.x = self.x * TILE_SIZE
         self.rect.y = self.y * TILE_SIZE
+
+###################################################################################################
+
+# button class
+class Button(Game_Class):
+	def __init__(self, game, x, y, image):
+		Game_Class.__init__(self, game, x, y)
+		self.temp_groups.append(self.game.game_buttons)
+		self.image = image
+		self.rect = self.image.get_rect()
+		

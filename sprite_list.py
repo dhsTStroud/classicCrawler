@@ -211,3 +211,52 @@ class Obs_Rock(Obstacle):
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum)
         Obstacle.__init__(self, game, x, y, self.image)
+
+###################################################################################################
+
+# BUTTONS
+
+# health button
+class Button_Health(Button):
+	# CLASS VARIABLES
+	image = Surface(100, 50)
+	button_type = "health"
+	
+	def __init__(self, game, x, y):
+		Button.__init__(self, game, x, y, self.image)
+		
+# scissors button
+class Button_Scissors(Button):
+	# CLASS VARIABLES
+	image = Surface(100, 50)
+	button_type = "scissors"
+	
+	def __init__(self, game, x, y):
+		Button.__init__(self, game, x, y, self.image)
+
+# rock button
+class Button_Rock(Button)
+	# CLASS VARIABLES
+	image = Surface(100, 50)
+	button_type = "rock"
+	
+	def __init__(self, game, x, y):
+		Button.__init__(self, game, x, y, self.image)
+		
+# paper button
+class Button_Paper(Button)
+	# CLASS VARIABLES
+	image = Surface(100, 50)
+	button_type = "paper"
+	
+	def __init__(self, game, x, y):
+		Button.__init__(self, game, x, y, self.image)
+		
+# start button
+class Button_Start(Button)
+	# CLASS VARIABLES
+	image = Surface(100, 50)
+	button_type = "start"
+	
+	def __init__(self, game, x, y):
+		Button.__init__(self, game, x, y, self.image)
