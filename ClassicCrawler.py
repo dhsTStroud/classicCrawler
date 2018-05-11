@@ -12,7 +12,7 @@ try:
 except:
     CONTROLLER = False
     # alt-4 if testing controller functionality
-##    CONTROLLER = True
+    CONTROLLER = True
 
 ################################################################################
 
@@ -40,6 +40,8 @@ class Game(object):
         self.drawMenu()
         # starts turns 'counter'
         self.playerHasMoved = 0
+        self.playerCanMove = True
+        self.inBattle = False
         if CONTROLLER:
             self.controller = Controller(self)
 
@@ -55,6 +57,7 @@ class Game(object):
 ##        self.menus = pg.sprite.Group()
         # spritegroup for obstacle sprites
         self.obs_sprites = pg.sprite.Group()
+        self.game_buttons = pg.sprite.Group()
 
     # empties all sprite groups
     def clearSpriteGroups(self):
@@ -107,29 +110,86 @@ class Game(object):
                 self.controller.healthbar()
             # button pressed and button type are returned
             # (movement or action types)
-            b, t = self.events()
+            b = self.events()
             # presses the corresponding button
-            self.buttonPress(b,t)
+            self.buttonPress(b)
             if self.playerHasMoved > 3:
                 for mob in self.mob_sprites:
                     mob.autoPath()
                 self.playerHasMoved = 0
             self.update()
-            self.drawMap()
-
+            if (not self.inBattle):
+                self.drawMap()
+                
     # executes button press
     # takes in a button and it's type
-    def buttonPress(self, b, t):
-        # if type is true, a movement key was pressed
-        if (t):
-            # as long as the player didn't just run into something
-            if(self.player.collide(b) and self.player.borderCheck(b)):
-                # a movement is consumed
-                self.playerHasMoved += 1
-                self.player.move(b)
+    def buttonPress(self, b):
+        #Checks if b is a key
+        if (b):
+            # if type is true, a movement key was pressed
+            if (b != "m"):
+                # as long as the player didn't just run into something
+                if(self.player.collide(b) and self.player.borderCheck(b)):
+                    # a movement is consumed
+                    self.playerHasMoved += 1
+                    self.player.move(b)
+            # mouse was pressed
+            if (b == "m"):
+                loser, damage = battleSelect(button.button_type)
+                actorDeath(loser, loser.takeDamage(damage))
+            else:
+                pass
+    def battleSelect(self, pc, mob):
+        #pc = players attack choice
+        #monsters attack choice
+        mc = mob.attack
+
+        #player and monster tie
+        if (pc == mc):
+            return self.player, 0
+
+        #player chooses rock
+        elif (pc == "rock"):
+            #player loses
+            if (mc == "paper"):
+                return self.player, 25
+            #player wins
+            else:
+                return mob, 25
+            
+        #player chooses paper        
+        elif (pc == "paper"):
+            if (mc == "scissors"):
+                return self.player, 25
+            else:
+                return mob, 25
+            
+        #player chooses scissors
+        elif (pc == "scissors"):
+            if (mc == "rock"):
+                return self.player, 25
+            else:
+                return mob, 25
+
+    def actorDeath(actor, living):
+        if (not actor.living):
+            self.inBattle = False
         else:
-            pass
-        
+            self.inBattle = True
+
+    def battleUI(self, enemy):
+        self.game_buttons.empty()
+        enemy.enlarge()
+        Button_rock(UI_CENTER - 105, UI_CENTER)
+        Button_scissors(UI_CENTER, UI_CENTER)
+        Button_paper(UI_CENTER + 105, UI_CENTER)
+        self.playerCanMove = False
+        self.inBattle = True
+
+    def mapUI(self):
+        self.inBattle = False
+        self.game_buttons.empty()
+            
     # closes the window
     def quitGame(self):
         pg.quit()
@@ -170,22 +230,27 @@ class Game(object):
                 if CONTROLLER:
                     GPIO.cleanup()
                 self.quitGame()
-            if event.type == pg.KEYDOWN:
-                if event.key == pg.K_LEFT:
-                    button = "a"
-                    buttonType = True
-                if event.key == pg.K_RIGHT:
-                    button = "d"
-                    buttonType = True
-                if event.key == pg.K_UP:
-                    button = "w"
-                    buttonType = True
-                if event.key == pg.K_DOWN:
-                    button = "s"
-                    buttonType = True
+            if (not self.inBattle):
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_LEFT:
+                        button = "a"
+                    if event.key == pg.K_RIGHT:
+                        button = "d"
+                    if event.key == pg.K_UP:
+                        button = "w"
+                    if event.key == pg.K_DOWN:
+                        button = "s"
+            if event.type == pg.MOUSEBUTTONDOWN:
+                #founds where mouse was pressed
+                mouse_pos = event.pos
+                #Checks which button was pressed
+                for button in self.game_buttons:
+                    if button.rect.collidepoint(mouse_pos):
+                        button = "m"
         if CONTROLLER:
-            button, buttonType = self.controller.movement()
-        return button, buttonType
+            button = self.controller.movement()
+        
+        return button
 
     # switches to fight mode
     def startFight(self, enemy):

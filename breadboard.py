@@ -3,24 +3,19 @@ from time import sleep
 
 class Controller(object):
     RGB = [6,5,4]
-    actions = [12,16,17]
     #       W   A   S   D
     WASD = [18, 21, 20, 19]
-    #     A   B
-    AB = [22, 24]
-    
+
     def __init__(self, game):
         self.game = game
         #LED and Button Pins
         GPIO.setmode(GPIO.BCM)
         
         #Setup output pins
-        GPIO.setup(self.actions,GPIO.OUT)
         GPIO.setup(self.RGB, GPIO.OUT)
         
         #Setup input pins
         GPIO.setup(self.WASD, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(self.AB, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         
     def healthbar(self):
         H = self.game.player.curHealth
@@ -37,16 +32,9 @@ class Controller(object):
         GPIO.output(self.RGB[0], R)
         GPIO.output(self.RGB[1], G)
         GPIO.output(self.RGB[2], B)
-        
-    def change_action(self, num = None):
-        for i in self.actions:
-            GPIO.output(self.actions, False)
-        for i in range(num):
-            GPIO.output(self.actions[i], True)
 
     def movement(self):
         retvar = None
-        retType = None
         #Move through the WASD keys
         for i in range(len(self.WASD)):
             #Check if pressed
@@ -65,17 +53,4 @@ class Controller(object):
                     print "DOWN"
                     retvar = 's'
                 sleep(.25)
-                retType = True
-        #move through AB buttons
-        for i in range(len(self.AB)):
-            #Check if pressed
-            if (GPIO.input(self.AB[i]) == True):
-                #Select button
-                if (self.AB[i] == 22):
-                    retvar = 'j'
-                #Deselect button
-                elif(self.AB[i]== 24):
-                    retvar = 'k'
-                sleep(.25)
-                retType = False
-        return retvar, retType                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+        return retvar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
