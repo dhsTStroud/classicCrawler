@@ -74,12 +74,22 @@ class Game(object):
 
     # creates the rightside user interface
     def drawMenuBackground(self):
+        # sets appropriate UI image
+        if self.atScreen == "title":
+            image = "ui_full_background.png"
+            location = (0,0)
+        elif self.atScreen == "map" or "battle":
+            image = "ui_half_displayScreen.png"
+            location = (WIDTH_CENTER, 0)
+        elif self.atScreen == "dead":
+            image = "ui_full_displayScreen.png"
+            location = (0,0)
         # loads the image (pg.image.load())
-        uiImage = pg.image.load(IMAGE_PATH + "ui_right_menu.png")
+        uiImage = pg.image.load(IMAGE_PATH + image)
         # screen.blit() plasters the image's pixels where you tell it to
         # the picture is not really interactable, only a background
-        self.screen.blit(uiImage, (WIDTH_CENTER, 0))
-
+        self.screen.blit(uiImage, location)
+        
     # draws a given image to the screen
     def drawImage(self, image, location):
         self.screen.blit(image, location)
@@ -109,24 +119,26 @@ class Game(object):
 
     # creates the default map UI
     def mapUI(self):
+        self.atScreen = "map"
         self.inBattle = False
         self.drawMenuBackground()
         self.special_mob.empty()
         self.enemy = None
         self.game_buttons.empty()
-        Button_Health(self, UI_CENTER[0]-180, UI_CENTER[1]-10)
+        Button_Health(self, UI_CENTER[0]-180, UI_CENTER[1])
 
     # creates the battle UI screen
     def battleUI(self, enemy):
+        self.atScreen = "battle"
         self.special_mob.add(enemy)
         self.enemy = enemy
         self.status = "I've picked a fight with a {}".format(self.enemy.name)
         self.game_buttons.empty()
         enemy.enlarge()
-        Button_Rock(self, UI_CENTER[0]-180, UI_CENTER[1]-10)
-        Button_Scissors(self, UI_CENTER[0], UI_CENTER[1]+90)
-        Button_Paper(self, UI_CENTER[0] , UI_CENTER[1]-10)
-        Button_Run(self, UI_CENTER[0]-180, UI_CENTER[1]+90)
+        Button_Rock(self, UI_CENTER[0]-180, UI_CENTER[1])
+        Button_Scissors(self, UI_CENTER[0], UI_CENTER[1]+100)
+        Button_Paper(self, UI_CENTER[0] , UI_CENTER[1])
+        Button_Run(self, UI_CENTER[0]-180, UI_CENTER[1]+100)
         self.playerCanMove = False
         self.inBattle = True
                 
@@ -136,7 +148,6 @@ class Game(object):
         # checks if b is a key
         # key returns None by default so if statement is necessary
         if (b != None):
-            print b
             # if type is true, a movement key was pressed
             if (b != "m"):
                 # as long as the player didn't just run into something
@@ -146,7 +157,6 @@ class Game(object):
                     self.player.move(b)
             # mouse was pressed
             if (b == "m"):
-                print "AHH"
                 self.detButton()
             else:
                 pass
@@ -161,7 +171,7 @@ class Game(object):
             else:
                 loser.takeDamage(damage)
                 # passes in the loser and the loser's health after taking damage
-                self.actorDeath(loser)
+                self.actorDeathCheck(loser)
         else:
             self.status = self.butDown.action()
 
@@ -208,7 +218,7 @@ class Game(object):
 
     # determines if the actor is still alive and whether or not to continue
     # the battle
-    def actorDeath(self, actor):
+    def actorDeathCheck(self, actor):
         if (not actor.living):
             # draws the battle one last time
             # to let the player know the enemy has run out of health
@@ -218,6 +228,9 @@ class Game(object):
             # all instances of that enemy are destroyed
             self.mob_sprites.remove(actor)
             self.mapUI()
+        # if player dies, game is over
+        if (not self.player.living):
+            self.atScreen = "dead"
 
     # draws text to the screen
     # 1 is default, for drawing a mob's health
@@ -236,11 +249,11 @@ class Game(object):
                                               actor.maxHealth),\
                                        False, (BLACK))
         if num == 1:
-            self.screen.blit(health, (UI_CENTER[0]-180, UI_CENTER[1]-30))
+            self.screen.blit(health, (UI_CENTER[0]-180, 55))
         elif num == 2:
-            self.screen.blit(health, (UI_CENTER[0]-180, UI_CENTER[1]-50))
+            self.screen.blit(health, (UI_CENTER[0]-180, 35))
         elif num == 3:
-            self.screen.blit(status, (UI_CENTER[0]-180, UI_CENTER[1]-100))
+            self.screen.blit(status, (UI_CENTER[0]-180, 15))
         
     # update portion of game loop
     def update(self):
@@ -345,12 +358,11 @@ class Game(object):
         if (not self.inBattle):
             if (CONTROLLER and button != "m"):
                 button = self.controller.movement()
-        print button  
         return button
 
     # shows the start menu
     def startMenu(self):
-        pass
+        self.atScreen = "title"
             
     # closes the window
     def quitGame(self):
