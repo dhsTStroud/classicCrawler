@@ -135,7 +135,8 @@ class Game(object):
     def buttonPress(self, b):
         # checks if b is a key
         # key returns None by default so if statement is necessary
-        if (b):
+        if (b != None):
+            print b
             # if type is true, a movement key was pressed
             if (b != "m"):
                 # as long as the player didn't just run into something
@@ -145,6 +146,7 @@ class Game(object):
                     self.player.move(b)
             # mouse was pressed
             if (b == "m"):
+                print "AHH"
                 self.detButton()
             else:
                 pass
@@ -316,7 +318,6 @@ class Game(object):
     # catches all events
     def events(self):
         button = None
-        buttonType = False
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 if CONTROLLER:
@@ -339,10 +340,12 @@ class Game(object):
                 for screenButton in self.game_buttons:
                     if screenButton.rect.collidepoint(mouse_pos):
                         self.butDown = screenButton
-                        button = "m"
-        if CONTROLLER:
-            button = self.controller.movement()
-        
+                        button = "m"        
+        #Only allowed to move if not in battle                
+        if (not self.inBattle):
+            if (CONTROLLER and button != "m"):
+                button = self.controller.movement()
+        print button  
         return button
 
     # shows the start menu

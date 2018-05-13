@@ -23,11 +23,11 @@ class Controller(object):
         R = 0
         G = 0
         B = 0
-        if (((H/maxH)*100) > 25):
+        if (((float(H)/maxH)*100) > 25):
             G = 1
-        if (75 >= ((H/maxH)*100) > 25):
+        if (75 >= ((float(H)/maxH)*100) > 25):
             B = 1
-        if (((H/maxH)*100) <= 25):
+        if (((float(H)/maxH)*100) <= 25):
             R = 1
         GPIO.output(self.RGB[0], R)
         GPIO.output(self.RGB[1], G)
