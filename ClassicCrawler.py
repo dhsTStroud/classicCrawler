@@ -1,5 +1,6 @@
 # refer to pygame with "pg"
 import pygame as pg
+from time import sleep
 # other game files
 from settings import *
 from sprites import *
@@ -12,7 +13,7 @@ try:
 except:
     CONTROLLER = False
     # alt-4 if testing controller functionality
-    CONTROLLER = True
+##    CONTROLLER = True
 
 ################################################################################
 
@@ -21,6 +22,7 @@ class Game(object):
     # sets up the GUI 
     def __init__(self):
         pg.init()
+        self.gFont = pg.font.SysFont('Sans', 20)
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
@@ -28,6 +30,7 @@ class Game(object):
     
     # initialize all variables and setup a new game
     def newGame(self):
+        self.status = "Out on a fresh new journey."
         self.spriteGroups()
         # creates the player sprite
         self.player = Actor_Player(self, 1, 1)
@@ -37,11 +40,10 @@ class Game(object):
         self.roomLevel = 0
         self.setRoom()
         # creates the player UI
-        self.drawMenu()
+        self.drawMenuBackground()
         # starts turns 'counter'
         self.playerHasMoved = 0
-        self.playerCanMove = True
-        self.inBattle = False
+        self.mapUI()
         if CONTROLLER:
             self.controller = Controller(self)
 
@@ -50,6 +52,8 @@ class Game(object):
         self.allActorSprites = pg.sprite.Group()
         # spritegroup for monsters
         self.mob_sprites = pg.sprite.Group()
+        # spritegroup for special mobs
+        self.special_mob = pg.sprite.Group()
         # spritegroup for tiles
         self.tile_sprites = pg.sprite.Group()
         self.special_tiles = pg.sprite.Group()
@@ -57,6 +61,7 @@ class Game(object):
 ##        self.menus = pg.sprite.Group()
         # spritegroup for obstacle sprites
         self.obs_sprites = pg.sprite.Group()
+        # spritegroup for button sprites
         self.game_buttons = pg.sprite.Group()
 
     # empties all sprite groups
@@ -68,12 +73,16 @@ class Game(object):
         self.obs_sprites.empty()
 
     # creates the rightside user interface
-    def drawMenu(self):
+    def drawMenuBackground(self):
         # loads the image (pg.image.load())
         uiImage = pg.image.load(IMAGE_PATH + "ui_right_menu.png")
         # screen.blit() plasters the image's pixels where you tell it to
         # the picture is not really interactable, only a background
         self.screen.blit(uiImage, (WIDTH_CENTER, 0))
+
+    # draws a given image to the screen
+    def drawImage(self, image, location):
+        self.screen.blit(image, location)
 
     # clears the room
     def clearRoom(self):
@@ -97,6 +106,144 @@ class Game(object):
         # the rest of the game is stone
         else:
             self.currentRoom = Room_Stone(self, self.currentRoom.exitCoord)
+
+    # creates the default map UI
+    def mapUI(self):
+        self.inBattle = False
+        self.drawMenuBackground()
+        self.special_mob.empty()
+        self.enemy = None
+        self.game_buttons.empty()
+        Button_Health(self, UI_CENTER[0]-180, UI_CENTER[1]-10)
+
+    # creates the battle UI screen
+    def battleUI(self, enemy):
+        self.special_mob.add(enemy)
+        self.enemy = enemy
+        self.status = "I've picked a fight with a {}".format(self.enemy.name)
+        self.game_buttons.empty()
+        enemy.enlarge()
+        Button_Rock(self, UI_CENTER[0]-180, UI_CENTER[1]-10)
+        Button_Scissors(self, UI_CENTER[0], UI_CENTER[1]+90)
+        Button_Paper(self, UI_CENTER[0] , UI_CENTER[1]-10)
+        Button_Run(self, UI_CENTER[0]-180, UI_CENTER[1]+90)
+        self.playerCanMove = False
+        self.inBattle = True
+                
+    # executes button press
+    # takes in a button and it's type
+    def buttonPress(self, b):
+        # checks if b is a key
+        # key returns None by default so if statement is necessary
+        if (b):
+            # if type is true, a movement key was pressed
+            if (b != "m"):
+                # as long as the player didn't just run into something
+                if(self.player.collide(b) and self.player.borderCheck(b)):
+                    # a movement is consumed
+                    self.playerHasMoved += 1
+                    self.player.move(b)
+            # mouse was pressed
+            if (b == "m"):
+                self.detButton()
+            else:
+                pass
+
+    # determines button type
+    def detButton(self):
+        if self.inBattle:
+            loser, damage = self.detWinner(self.butDown.button_type)
+            if (damage == "run"):
+                loser.shrink()
+                self.mapUI()
+            else:
+                loser.takeDamage(damage)
+                # passes in the loser and the loser's health after taking damage
+                self.actorDeath(loser)
+        else:
+            self.status = self.butDown.action()
+
+    # determines the winner of a hand
+    # returns the loser and damage amount (25 unless draw)
+    def detWinner(self, pc):
+        # pc = players attack choice
+        # monsters attack choice
+        mc = self.enemy.attack()
+        if (not pc):
+            pc = mc
+
+        # player and monster tie
+        if (pc == mc):
+            self.status = "We played the same thing!"
+            return self.player, 0
+        # player chooses rock
+        elif (pc == "rock"):
+            self.status = "They played {}".format(mc)
+            # player loses
+            if (mc == "paper"):
+                return self.player, 25
+            # player wins
+            else:
+                return self.enemy, 25
+        # player chooses paper
+        elif (pc == "paper"):
+            self.status = "They played {}".format(mc)
+            if (mc == "scissors"):
+                return self.player, 25
+            else:
+                return self.enemy, 25
+        # player chooses scissors
+        elif (pc == "scissors"):
+            self.status = "They played {}".format(mc)
+            if (mc == "rock"):
+                return self.player, 25
+            else:
+                return self.enemy, 25
+        # player chooses run
+        elif (pc == "run"):
+            self.status = "I ran away..."
+            return self.enemy, "run"
+
+    # determines if the actor is still alive and whether or not to continue
+    # the battle
+    def actorDeath(self, actor):
+        if (not actor.living):
+            # draws the battle one last time
+            # to let the player know the enemy has run out of health
+            self.drawBattle()
+            sleep(1.5)
+            self.status = "I won that fight!"
+            # all instances of that enemy are destroyed
+            self.mob_sprites.remove(actor)
+            self.mapUI()
+
+    # draws text to the screen
+    # 1 is default, for drawing a mob's health
+    # 2 is for debugging
+    # 3 is for statuses
+    def drawText(self, actor=None, num = 1):
+        # 3 just prints status
+        if num == 3:
+            # makeshift image for text
+            status = self.gFont.render(self.status, False, (BLACK))
+        else:
+            # makeshift image for text
+            health = self.gFont.render("{} Health: {}/{}".\
+                                       format(actor.name,\
+                                              actor.curHealth, \
+                                              actor.maxHealth),\
+                                       False, (BLACK))
+        if num == 1:
+            self.screen.blit(health, (UI_CENTER[0]-180, UI_CENTER[1]-30))
+        elif num == 2:
+            self.screen.blit(health, (UI_CENTER[0]-180, UI_CENTER[1]-50))
+        elif num == 3:
+            self.screen.blit(status, (UI_CENTER[0]-180, UI_CENTER[1]-100))
+        
+    # update portion of game loop
+    def update(self):
+        # updates "allSprites" sprite group
+        self.allActorSprites.update()
             
     # game loop
     def run(self):
@@ -118,86 +265,25 @@ class Game(object):
                     mob.autoPath()
                 self.playerHasMoved = 0
             self.update()
-            if (not self.inBattle):
+            # draws the appropriate scenes depending
+            # on whether or not you're in battle
+            if self.inBattle:
+                self.drawBattle()
+            else:
                 self.drawMap()
-                
-    # executes button press
-    # takes in a button and it's type
-    def buttonPress(self, b):
-        #Checks if b is a key
-        if (b):
-            # if type is true, a movement key was pressed
-            if (b != "m"):
-                # as long as the player didn't just run into something
-                if(self.player.collide(b) and self.player.borderCheck(b)):
-                    # a movement is consumed
-                    self.playerHasMoved += 1
-                    self.player.move(b)
-            # mouse was pressed
-            if (b == "m"):
-                loser, damage = battleSelect(button.button_type)
-                actorDeath(loser, loser.takeDamage(damage))
-            else:
-                pass
-    def battleSelect(self, pc, mob):
-        #pc = players attack choice
-        #monsters attack choice
-        mc = mob.attack
 
-        #player and monster tie
-        if (pc == mc):
-            return self.player, 0
-
-        #player chooses rock
-        elif (pc == "rock"):
-            #player loses
-            if (mc == "paper"):
-                return self.player, 25
-            #player wins
-            else:
-                return mob, 25
-            
-        #player chooses paper        
-        elif (pc == "paper"):
-            if (mc == "scissors"):
-                return self.player, 25
-            else:
-                return mob, 25
-            
-        #player chooses scissors
-        elif (pc == "scissors"):
-            if (mc == "rock"):
-                return self.player, 25
-            else:
-                return mob, 25
-
-    def actorDeath(actor, living):
-        if (not actor.living):
-            self.inBattle = False
-        else:
-            self.inBattle = True
-
-    def battleUI(self, enemy):
-        self.game_buttons.empty()
-        enemy.enlarge()
-        Button_rock(UI_CENTER - 105, UI_CENTER)
-        Button_scissors(UI_CENTER, UI_CENTER)
-        Button_paper(UI_CENTER + 105, UI_CENTER)
-        self.playerCanMove = False
-        self.inBattle = True
-
-    def mapUI(self):
-        self.inBattle = False
-        self.game_buttons.empty()
-            
-    # closes the window
-    def quitGame(self):
-        pg.quit()
-
-    # update portion of game loop
-    def update(self):
-        # updates "allSprites" sprite group
-        self.allActorSprites.update()
+    # draws the battle scene to the screen
+    def drawBattle(self):
+        self.drawMenuBackground()
+        self.special_mob.draw(self.screen)
+        self.game_buttons.draw(self.screen)
+        # draws enemy health
+        self.drawText(self.enemy)
+        # draw's current status
+        self.drawText(None, 3)
+        if (not CONTROLLER):
+            self.drawText(self.player, 2)
+        pg.display.flip()
 
     # draws the grid for the map portion of the screen
     def drawGrid(self):
@@ -212,11 +298,17 @@ class Game(object):
 
     # running draw method
     def drawMap(self):
+        self.drawMenuBackground()
         self.tile_sprites.draw(self.screen)
         self.obs_sprites.draw(self.screen)
         self.special_tiles.draw(self.screen)
         self.drawGrid()
         self.allActorSprites.draw(self.screen)
+        self.game_buttons.draw(self.screen)
+        # draw's current status
+        self.drawText(None, 3)
+        if (not CONTROLLER):
+            self.drawText(self.player, 2)
         # flips the display each time it's called
         # prevents lag
         pg.display.flip()
@@ -244,22 +336,22 @@ class Game(object):
                 #founds where mouse was pressed
                 mouse_pos = event.pos
                 #Checks which button was pressed
-                for button in self.game_buttons:
-                    if button.rect.collidepoint(mouse_pos):
+                for screenButton in self.game_buttons:
+                    if screenButton.rect.collidepoint(mouse_pos):
+                        self.butDown = screenButton
                         button = "m"
         if CONTROLLER:
             button = self.controller.movement()
         
         return button
 
-    # switches to fight mode
-    def startFight(self, enemy):
-        plyr = self.player
-        enmy = enemy
-
     # shows the start menu
     def startMenu(self):
         pass
+            
+    # closes the window
+    def quitGame(self):
+        pg.quit()
 
 ################################################################################
 # creates the game object

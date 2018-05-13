@@ -219,16 +219,21 @@ class Obs_Rock(Obstacle):
 # health button
 class Button_Health(Button):
 	# CLASS VARIABLES
-	image = pg.Surface((100, 50))
+	image = 4
 	button_type = "health"
 	
 	def __init__(self, game, x, y):
 		Button.__init__(self, game, x, y, self.image)
+
+        # heals the player for a 1/4 of their health
+	def action(self):
+            retString = self.game.player.heal(25)
+            return retString
 		
 # scissors button
 class Button_Scissors(Button):
 	# CLASS VARIABLES
-	image = pg.Surface((100, 50))
+	image = 2
 	button_type = "scissors"
 	
 	def __init__(self, game, x, y):
@@ -237,7 +242,7 @@ class Button_Scissors(Button):
 # rock button
 class Button_Rock(Button):
 	# CLASS VARIABLES
-	image = pg.Surface((100, 50))
+	image = 0
 	button_type = "rock"
 	
 	def __init__(self, game, x, y):
@@ -246,7 +251,7 @@ class Button_Rock(Button):
 # paper button
 class Button_Paper(Button):
 	# CLASS VARIABLES
-	image = pg.Surface((100, 50))
+	image = 1
 	button_type = "paper"
 	
 	def __init__(self, game, x, y):
@@ -255,8 +260,17 @@ class Button_Paper(Button):
 # start button
 class Button_Start(Button):
 	# CLASS VARIABLES
-	image = pg.Surface((100, 50))
+	image = 3
 	button_type = "start"
 	
 	def __init__(self, game, x, y):
 		Button.__init__(self, game, x, y, self.image)
+
+# run button
+class Button_Run(Button):
+    # CLASS VARIABLES
+    image = 5
+    button_type = "run"
+	
+    def __init__(self, game, x, y):
+            Button.__init__(self, game, x, y, self.image)

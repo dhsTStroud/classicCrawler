@@ -24,6 +24,10 @@ TILE_IMG_LIST = [(IMAGE_PATH+"tile_"+i+".png") for i in ["exit", "grass",\
 # list of obsacle sprite images
 OBS_IMG_LIST = [(IMAGE_PATH+"obs_"+i+".png") for i in ["stump", "dirtmound",\
                                                        "rock"]]
+# list of button sprite images
+BUT_IMG_LIST = [(IMAGE_PATH+"button_"+i+".png") for i in ["rock", "paper",\
+                                                          "scissors", "start",\
+                                                          "health", "run"]]
 
 ################################################################################
 
@@ -36,28 +40,6 @@ class Game_Class(object):
         self.game = game
         self.x = x
         self.y = y
-
-    @property
-    def x(self):
-        return self._x
-    @x.setter
-    def x(self, value):
-        # performs range checking
-        if (value >= 0) and (value <= TILE_TO_GRID):
-            self._x = value
-        else:
-            self._x = 0
-
-    @property
-    def y(self):
-        return self._y
-    @y.setter
-    def y(self, value):
-        # performs range checking
-        if (value >= 0) and (value <= TILE_TO_GRID):
-            self._y = value
-        else:
-            self._y = 0
 
     # multiplies 
     def placeAtTile(self):
@@ -78,6 +60,24 @@ class Game_Class(object):
         # up at the right pixel number
         self.rect.x = self.x * TILE_SIZE
         self.rect.y = self.y * TILE_SIZE
+
+    # enlarges image to take up half the screen
+    def enlarge(self):
+        self.backupImg = self.image
+        self.image = pg.transform.scale(self.image, (400, 400))
+        self.rect = self.image.get_rect()
+        self.backupCoords = (self.x, self.y)
+        self.x = 0
+        self.y = 0
+        self.update
+
+    # shrinks image back to normal size
+    def shrink(self):
+        self.image = self.backupImg
+        self.rect = self.image.get_rect()
+        self.x = self.backupCoords[0]
+        self.y = self.backupCoords[1]
+        self.update
 
     # sets up groups
     def setup_groups(self, base, extra):
@@ -273,15 +273,19 @@ class Actor(Game_Class, pg.sprite.Sprite):
         self.boundary()
 
     def heal(self, amount):
-        self.curhealth += amount
+        self.curHealth += amount
         if self.curHealth > self.maxHealth:
             self.curHealth = self.maxHealth
+            return "My health is full!"
+        else:
+            return "I healed up a bit."
 
     # takes damage
     def takeDamage(self, amount):
         self.curHealth -= amount
-        if self.curHealth < 0:
+        if self.curHealth <= 0:
             self.living = False
+            self.dead()
         return self.living
 
     # MAGIC METHODS
@@ -292,6 +296,10 @@ class Actor(Game_Class, pg.sprite.Sprite):
 
     # ABSTRACT METHODS
 
+    # action for dying
+    def dead(self):
+        raise NotImplementedError("{} needs dead method.".format(self))
+    
     # sets or adds levels depending on the actor
     def levelUp(self):
         raise NotImplementedError("{} needs levelUp method.".format(self))
@@ -329,14 +337,35 @@ class Monster(Actor):
         # if x = 3, then 3 * TILE_SIZE = where the image will be placed
         self.rect.x = self.x * TILE_SIZE
         self.rect.y = self.y * TILE_SIZE
+        self.boundary()
+
+    # determines an attack
+    def attack(self):
+        attacks = ['rock', 'paper', 'scissors']
+        attack = randint(0,2)
+        image = BUT_IMG_LIST[attack]
+        return attacks[attack]
+
+    # action for dying
+    def dead(self):
+        self.x = 9001
+        self.y = 9001
+        self.update()
 
 ###################################################################################################
 
 # button class
-class Button(Game_Class):
+class Button(Game_Class, pg.sprite.Sprite):
     def __init__(self, game, x, y, image):
         Game_Class.__init__(self, game, x, y)
-        self.temp_groups.append(self.game.game_buttons)
-        self.image = image
+        self.groups = self.game.game_buttons
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.image = pg.image.load(BUT_IMG_LIST[image])
         self.rect = self.image.get_rect()
+        self.update()
+
+    # moves the sprite to where it should be
+    def update(self):
+        self.rect.x = self.x
+        self.rect.y = self.y
         

@@ -34,11 +34,7 @@ class BaseRoom(object):
     def createExit(self):
         # selects a random reserved tile to ensure accessibility
         # spot will be a tuple as every item in self.reserved is a tuple
-        while True:
-            spot = self.reserved[randint(0, len(self.reserved)-1)]
-            spot = (spot[0]-1, spot[1]-1)
-            if spot not in self.reserved:
-                break
+        spot = self.randoCoord()
         # places the exit tile on that location
         self.exit = Tile_Exit(self.game, spot[0], spot[1])
         self.exitCoord = (self.exit.x, self.exit.y)
