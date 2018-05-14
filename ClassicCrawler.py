@@ -22,7 +22,10 @@ class Game(object):
     # sets up the GUI 
     def __init__(self):
         pg.init()
+        # normal game font
         self.gFont = pg.font.SysFont('Sans', 20)
+        # health potions font
+        self.hFont = pg.font.SysFont('Sans', 30)
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
@@ -82,10 +85,6 @@ class Game(object):
         # screen.blit() plasters the image's pixels where you tell it to
         # the picture is not really interactable, only a background
         self.screen.blit(uiImage, location)
-        
-    # draws a given image to the screen
-    def drawImage(self, image, location):
-        self.screen.blit(image, location)
 
     # clears the room
     def clearRoom(self):
@@ -278,6 +277,13 @@ class Game(object):
 
     def drawDeathText(self):
         pass
+
+    # draws the amount of health potions the player has to the screen
+    def drawHealthPotions(self):
+        location = (UI_CENTER[0]-170, UI_CENTER[1]+5)
+        # takes amount from player variable
+        text = self.hFont.render(str(self.player.healthPotions), False, (BLACK))
+        self.screen.blit(text, location)
         
     # update portion of game loop
     def update(self):
@@ -349,6 +355,7 @@ class Game(object):
         self.drawGrid()
         self.allActorSprites.draw(self.screen)
         self.game_buttons.draw(self.screen)
+        self.drawHealthPotions()
         # draw's current status
         self.drawText(None, 3)
         if (not CONTROLLER):
@@ -420,5 +427,3 @@ GAME = Game()
 GAME.startMenu()
 while True:
     GAME.startMenu()
-##    GAME.newGame()
-##    GAME.run()

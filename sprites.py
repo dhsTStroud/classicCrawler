@@ -307,11 +307,6 @@ class Actor(Game_Class, pg.sprite.Sprite):
 
     def heal(self, amount):
         self.curHealth += amount
-        if self.curHealth > self.maxHealth:
-            self.curHealth = self.maxHealth
-            return "My health is full!"
-        else:
-            return "I healed up a bit."
 
     # MAGIC METHODS
     

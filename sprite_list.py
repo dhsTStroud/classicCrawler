@@ -20,9 +20,23 @@ class Actor_Player(Actor):
     maxHealth = 100
     
     def __init__(self, game, x, y):
+        self.healthPotions = 3
         # creates bounding box for sprite
         self.rect = self.image.get_rect()
         Actor.__init__(self, game, x, y, self.name)
+
+    # removes a potion when called
+    def drinkHealthPotion(self):
+        retString = "I'm out of health potions!"
+        if self.curHealth >= self.maxHealth:
+            self.curHealth = self.maxHealth
+            retString = "My health is full."
+        elif (self.healthPotions >= 1):
+            retString = "I drank a health potion."
+            self.heal(25)
+            self.healthPotions -= 1
+        return retString
+        
 
     ############################################################################
 
@@ -238,7 +252,7 @@ class Button_Health(Button):
 
         # heals the player for a 1/4 of their health
 	def action(self):
-            retString = self.game.player.heal(25)
+            retString = self.game.player.drinkHealthPotion()
             return retString
 		
 # start button
