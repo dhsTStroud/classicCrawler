@@ -138,6 +138,7 @@ class Obstacle(Game_Class, pg.sprite.Sprite):
         self.update()
         self.curHealth = self.maxHealth
         self.bumpCount = 0
+        self.hPotions = self.loot()
 
     # determines an attack
     def attack(self):
@@ -161,7 +162,17 @@ class Obstacle(Game_Class, pg.sprite.Sprite):
     # creates object bounds
     def boundary(self):
         # bounds for actor interaction
-        self.bounds = {'c':(self.x, self.y)}        
+        self.bounds = {'c':(self.x, self.y)}
+
+    # determines how many, if any, health potions the player recieves for
+    # killing this mob
+    def loot(self):
+        # 96% chance to give no health potions
+        chance = [0 for i in range(96)]
+        # 3% chance to give 1 health potion
+        chance += [1 for i in range(3)]
+
+        return chance[randint(0, len(chance)-1)]
 
     ############################################################################
         
@@ -361,6 +372,19 @@ class Monster(Actor):
         attack = randint(0,2)
         image = BUT_IMG_LIST[attack]
         return attacks[attack]
+
+    # determines how many, if any, health potions the player recieves for
+    # killing this mob
+    def loot(self, chance0, chance1, chance2):
+        # chance to give no health potions
+        chance = [0 for i in range(chance0)]
+        # chance to give 1 health potion
+        chance += [1 for i in range(chance1)]
+        # chance to give 2 health potions
+        chance += [2 for i in range(chance2)]
+        # amount determined
+        potions = chance[randint(0, len(chance)-1)]
+        return potions
 
 ###################################################################################################
 

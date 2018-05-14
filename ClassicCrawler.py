@@ -241,7 +241,10 @@ class Game(object):
             # to let the player know the enemy has run out of health
             self.drawBattle()
             sleep(1.5)
-            self.status = "I won that fight!"
+            self.status = self.player.addHealthPotions(actor.hPotions)
+            self.drawBattle()
+            sleep(1.5)
+            self.status = "I beat the {}!".format(actor.name)
             # all instances of that enemy are destroyed
             self.mob_sprites.remove(actor)
             self.mapUI()

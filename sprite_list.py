@@ -36,6 +36,22 @@ class Actor_Player(Actor):
             self.heal(25)
             self.healthPotions -= 1
         return retString
+
+    # adds an amount of health potions to player stockpile
+    def addHealthPotions(self, amount):
+        retString = "I have too many health potions already!"
+        if self.healthPotions >= 99:
+            return retString
+        else:
+            if amount <= 0:
+                retString = "I got nothing for that, what a waste."
+                return retString
+            elif amount == 1:
+                retString = "I recieved a health potion!"
+            else:
+                retString = "I recieved {} health potions!".format(amount)
+            self.healthPotions += amount
+        return retString
         
 
     ############################################################################
@@ -56,6 +72,10 @@ class _Mob_Template(Monster):
         # passes in (self, game, x, y, imgNum, name="ACTOR")
         # if mob is a slime, put True after self.name
         Monster.__init__(self, game, x, y, self.image, self.name)
+        # generates an amount of health potions to return when killed
+        # should all three be ints and add up to 100
+        self.hPotions = self.loot(chance1, chance2, chance3)
+
 '''
 
 
@@ -70,6 +90,8 @@ class Actor_Ghost(Monster):
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum, name="ACTOR")
         Monster.__init__(self, game, x, y, self.image, self.name)
+        # generates an amount of health potions to return when killed
+        self.hPotions = self.loot(40, 50, 10)
 
 
 # zombie mob class
@@ -83,6 +105,8 @@ class Actor_Zombie(Monster):
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum, name="ACTOR")
         Monster.__init__(self, game, x, y, self.image, self.name)
+        # generates an amount of health potions to return when killed
+        self.hPotions = self.loot(50, 45, 5)
 
 
 # ghoul mob class
@@ -96,6 +120,8 @@ class Actor_Ghoul(Monster):
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum, name="ACTOR")
         Monster.__init__(self, game, x, y, self.image, self.name)
+        # generates an amount of health potions to return when killed
+        self.hPotions = self.loot(45, 40, 15)
 
 
 # skeleton mob class
@@ -109,6 +135,8 @@ class Actor_Skeleton(Monster):
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum, name="ACTOR")
         Monster.__init__(self, game, x, y, self.image, self.name)
+        # generates an amount of health potions to return when killed
+        self.hPotions = self.loot(45, 40, 15)
 
         
 # blue slime mob class
@@ -123,6 +151,8 @@ class Actor_Slime(Monster):
         # passes in (self, game, x, y, imgNum, name="ACTOR")
         # if mob is a slime, put True after self.name
         Monster.__init__(self, game, x, y, self.image, self.name, True)
+        # generates an amount of health potions to return when killed
+        self.hPotions = self.loot(25, 70, 5)
 
 ################################################################################
 
