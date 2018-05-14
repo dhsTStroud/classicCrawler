@@ -140,11 +140,14 @@ class BaseRoom(object):
             # creates a random (x,y) coordinate as a tuple
             randCoord = self.randoCoord(used)
             used.add(randCoord)
-            currentMob = self.enemyInterpreter(randCoord[0], randCoord[1], self.enemyType)
+            currentMob = self.enemyInterpreter(randCoord[0], \
+                                               randCoord[1], \
+                                               self.enemyType)
             # adds currentMob to reserved placement list
             self.reserved.append(currentMob.bounds['c'])
 
-    # takes an int, x, and y, and returns a mob at (x, y) coordinates based on int given
+    # takes an int, x, and y, and returns a mob at (x, y)
+    # coordinates based on int given
     def enemyInterpreter(self, x, y, enType):
         # return variable will be a mob, set to None for initialization
         retMob = None
@@ -172,7 +175,7 @@ class Room_Grass(BaseRoom):
 
     # game is passed in as self in main program
     # difficulty determines amount of enemies
-    def __init__(self, game, entrance, difficulty = 3):
+    def __init__(self, game, entrance, difficulty = randint(3,5)):
         BaseRoom.__init__(self, game, self.tile_type, entrance, \
                           self.mob_type, difficulty)
 
@@ -204,10 +207,13 @@ class Room_Stone(BaseRoom):
         BaseRoom.__init__(self, game, self.tile_type, entrance, \
                           self.mob_type, difficulty)
 
-    # takes an int, x, and y, and returns a mob at (x, y) coordinates based on int given
+    # takes an int, x, and y, and returns a mob at (x, y)
+    # coordinates based on int given
     def enemyInterpreter(self, x, y, enType):
+        # creates a percentage based "chance" of a certain mob spawning
+        enChance = [0,0,0,0,1,1,1,1,2,2,3,3,3,4]
         # mob types will be random
-        enType = randint(0, 3)
+        enType = enChance[randint(0, len(enChance)-1)]
         # return variable will be a mob, set to None for initialization
         retMob = None
         if enType == 0:
