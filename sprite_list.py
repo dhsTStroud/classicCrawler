@@ -177,6 +177,8 @@ class _Obs_Template(Obstacle):
     # KEYWORDS AND CLASS VARIABLES
     # respective image index from OBS_IMAGE_LIST (see at top)
     image = int()
+    hand = # the hand it plays if forced to fight
+    maxHealth = int()
     
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum)
@@ -187,6 +189,9 @@ class _Obs_Template(Obstacle):
 class Obs_Stump(Obstacle):
     # KEYWORDS AND CLASS VARIABLES
     image = 0
+    name = "Stump"
+    hand = "paper"
+    maxHealth = 25
     
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum)
@@ -197,6 +202,9 @@ class Obs_Dirtmound(Obstacle):
     # KEYWORDS AND CLASS VARIABLES
     # respective image index from OBS_IMAGE_LIST (see at top)
     image = 1
+    name = "Dirt Mound"
+    hand = "rock"
+    maxHealth = 50
     
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum)
@@ -207,6 +215,9 @@ class Obs_Rock(Obstacle):
     # KEYWORDS AND CLASS VARIABLES
     # respective image index from OBS_IMAGE_LIST (see at top)
     image = 2
+    name = "Rock"
+    hand = "rock"
+    maxHealth = 100
     
     def __init__(self, game, x, y):
         # passes in (self, game, x, y, imgNum)
@@ -228,6 +239,21 @@ class Button_Health(Button):
         # heals the player for a 1/4 of their health
 	def action(self):
             retString = self.game.player.heal(25)
+            return retString
+		
+# start button
+class Button_Start(Button):
+	# CLASS VARIABLES
+	image = 3
+	button_type = "start"
+	
+	def __init__(self, game, x, y):
+		Button.__init__(self, game, x, y, self.image)
+
+        # starts a new game for the game given
+	def action(self):
+            retString = "Out on a fresh new journey."
+            self.game.newGame()
             return retString
 		
 # scissors button
@@ -253,15 +279,6 @@ class Button_Paper(Button):
 	# CLASS VARIABLES
 	image = 1
 	button_type = "paper"
-	
-	def __init__(self, game, x, y):
-		Button.__init__(self, game, x, y, self.image)
-		
-# start button
-class Button_Start(Button):
-	# CLASS VARIABLES
-	image = 3
-	button_type = "start"
 	
 	def __init__(self, game, x, y):
 		Button.__init__(self, game, x, y, self.image)

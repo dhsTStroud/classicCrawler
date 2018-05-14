@@ -27,11 +27,9 @@ class Game(object):
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
         pg.key.set_repeat(500, 100)
-    
+        
     # initialize all variables and setup a new game
     def newGame(self):
-        self.status = "Out on a fresh new journey."
-        self.spriteGroups()
         # creates the player sprite
         self.player = Actor_Player(self, 1, 1)
         # sets player at level 0
@@ -41,7 +39,7 @@ class Game(object):
         self.setRoom()
         # creates the player UI
         self.drawMenuBackground()
-        # starts turns 'counter'
+        # starts/resets turns 'counter'
         self.playerHasMoved = 0
         self.mapUI()
         if CONTROLLER:
@@ -57,8 +55,6 @@ class Game(object):
         # spritegroup for tiles
         self.tile_sprites = pg.sprite.Group()
         self.special_tiles = pg.sprite.Group()
-##        # spritegroup for UI menu sprites
-##        self.menus = pg.sprite.Group()
         # spritegroup for obstacle sprites
         self.obs_sprites = pg.sprite.Group()
         # spritegroup for button sprites
@@ -75,15 +71,12 @@ class Game(object):
     # creates the rightside user interface
     def drawMenuBackground(self):
         # sets appropriate UI image
-        if self.atScreen == "title":
-            image = "ui_full_background.png"
-            location = (0,0)
-        elif self.atScreen == "map" or "battle":
-            image = "ui_half_displayScreen.png"
-            location = (WIDTH_CENTER, 0)
-        elif self.atScreen == "dead":
+        if (self.atScreen == "title") or (self.atScreen == "dead"):
             image = "ui_full_displayScreen.png"
             location = (0,0)
+        elif (self.atScreen == "map") or (self.atScreen == "battle"):
+            image = "ui_half_displayScreen.png"
+            location = (WIDTH_CENTER, 0)
         # loads the image (pg.image.load())
         uiImage = pg.image.load(IMAGE_PATH + image)
         # screen.blit() plasters the image's pixels where you tell it to
@@ -117,6 +110,24 @@ class Game(object):
         else:
             self.currentRoom = Room_Stone(self, self.currentRoom.exitCoord)
 
+    # creates the default title screen
+    def titleUI(self):
+        self.atScreen = "title"
+        self.inBattle = False
+        self.spriteGroups()
+        Button_Start(self, 30, HEIGHT_CENTER+70)
+
+    # creates the initial death screen
+    def deathUI(self):
+        self.clearRoom()
+        self.atScreen = "dead"
+        self.inBattle = False
+        self.special_mob.empty()
+        self.enemy = None
+        self.drawMenuBackground()
+        self.game_buttons.empty()
+        Button_Start(self, UI_CENTER[0]-10, UI_CENTER[1]+70)
+
     # creates the default map UI
     def mapUI(self):
         self.atScreen = "map"
@@ -139,7 +150,6 @@ class Game(object):
         Button_Scissors(self, UI_CENTER[0], UI_CENTER[1]+100)
         Button_Paper(self, UI_CENTER[0] , UI_CENTER[1])
         Button_Run(self, UI_CENTER[0]-180, UI_CENTER[1]+100)
-        self.playerCanMove = False
         self.inBattle = True
                 
     # executes button press
@@ -181,9 +191,9 @@ class Game(object):
         # pc = players attack choice
         # monsters attack choice
         mc = self.enemy.attack()
+        # if player choice is None, player choice = monster choice
         if (not pc):
             pc = mc
-
         # player and monster tie
         if (pc == mc):
             self.status = "We played the same thing!"
@@ -213,13 +223,21 @@ class Game(object):
                 return self.enemy, 25
         # player chooses run
         elif (pc == "run"):
-            self.status = "I ran away..."
+            self.status = "I ran away from the {}...".format(self.enemy.name)
             return self.enemy, "run"
 
     # determines if the actor is still alive and whether or not to continue
     # the battle
     def actorDeathCheck(self, actor):
-        if (not actor.living):
+        # if player dies, game is over
+        if (self.player.living == False):
+            self.drawBattle()
+            sleep(1.5)
+            self.status = "You were killed by a {}.".format(self.enemy.name)
+            self.drawBattle()
+            sleep(2)
+            self.deathUI()
+        elif (not actor.living) and (self.player.living):
             # draws the battle one last time
             # to let the player know the enemy has run out of health
             self.drawBattle()
@@ -228,9 +246,6 @@ class Game(object):
             # all instances of that enemy are destroyed
             self.mob_sprites.remove(actor)
             self.mapUI()
-        # if player dies, game is over
-        if (not self.player.living):
-            self.atScreen = "dead"
 
     # draws text to the screen
     # 1 is default, for drawing a mob's health
@@ -241,6 +256,9 @@ class Game(object):
         if num == 3:
             # makeshift image for text
             status = self.gFont.render(self.status, False, (BLACK))
+        elif num == 4:
+            text1 = self.gFont.render(self.status[0], False, (BLACK))
+            text2 = self.gFont.render(self.status[1], False, (BLACK))
         else:
             # makeshift image for text
             health = self.gFont.render("{} Health: {}/{}".\
@@ -254,6 +272,12 @@ class Game(object):
             self.screen.blit(health, (UI_CENTER[0]-180, 35))
         elif num == 3:
             self.screen.blit(status, (UI_CENTER[0]-180, 15))
+        elif num == 4:
+            self.screen.blit(text1, (30, 35))
+            self.screen.blit(text2, (30, 55))
+
+    def drawDeathText(self):
+        pass
         
     # update portion of game loop
     def update(self):
@@ -275,17 +299,22 @@ class Game(object):
             b = self.events()
             # presses the corresponding button
             self.buttonPress(b)
-            if self.playerHasMoved > 3:
+            if (self.atScreen == "map") and (self.playerHasMoved > 3):
                 for mob in self.mob_sprites:
                     mob.autoPath()
                 self.playerHasMoved = 0
-            self.update()
             # draws the appropriate scenes depending
             # on whether or not you're in battle
-            if self.inBattle:
+            if self.atScreen == "battle":
+                self.update()
                 self.drawBattle()
-            else:
+            elif self.atScreen == "map":
+                self.update()
                 self.drawMap()
+            elif self.atScreen == "title":
+                self.drawStartMenu()
+            elif self.atScreen == "dead":
+                self.drawDeathScreen()
 
     # draws the battle scene to the screen
     def drawBattle(self):
@@ -328,6 +357,20 @@ class Game(object):
         # prevents lag
         pg.display.flip()
 
+    # draws start menu to screen
+    def drawStartMenu(self):
+        self.drawMenuBackground()
+        self.game_buttons.draw(self.screen)
+        self.drawText(None, 4)
+        pg.display.flip()
+
+    # draws death screen to screen
+    def drawDeathScreen(self):
+        self.drawMenuBackground()
+        self.game_buttons.draw(self.screen)
+##        self.drawDeathText()
+        pg.display.flip()
+
     # catches all events
     def events(self):
         button = None
@@ -336,7 +379,7 @@ class Game(object):
                 if CONTROLLER:
                     GPIO.cleanup()
                 self.quitGame()
-            if (not self.inBattle):
+            if (self.atScreen == "map"):
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_LEFT:
                         button = "a"
@@ -353,16 +396,19 @@ class Game(object):
                 for screenButton in self.game_buttons:
                     if screenButton.rect.collidepoint(mouse_pos):
                         self.butDown = screenButton
-                        button = "m"        
+                        button = "m"
         #Only allowed to move if not in battle                
-        if (not self.inBattle):
+        if (self.atScreen == "map"):
             if (CONTROLLER and button != "m"):
                 button = self.controller.movement()
         return button
 
     # shows the start menu
     def startMenu(self):
-        self.atScreen = "title"
+        self.titleUI()
+        self.status = ["You're about to enjoy a classic crawler!",\
+                      "Press the start button below to play the game."]
+        self.run()
             
     # closes the window
     def quitGame(self):
@@ -373,5 +419,6 @@ class Game(object):
 GAME = Game()
 GAME.startMenu()
 while True:
-    GAME.newGame()
-    GAME.run()
+    GAME.startMenu()
+##    GAME.newGame()
+##    GAME.run()

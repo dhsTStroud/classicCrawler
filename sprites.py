@@ -40,6 +40,21 @@ class Game_Class(object):
         self.game = game
         self.x = x
         self.y = y
+        self.living = True
+
+    # takes damage
+    def takeDamage(self, amount):
+        self.curHealth -= amount
+        if self.curHealth <= 0:
+            self.living = False
+            self.dead()
+        return self.living
+
+    # action for dying
+    def dead(self):
+        self.x = 9001
+        self.y = 9001
+        self.update()
 
     # multiplies 
     def placeAtTile(self):
@@ -60,6 +75,7 @@ class Game_Class(object):
         # up at the right pixel number
         self.rect.x = self.x * TILE_SIZE
         self.rect.y = self.y * TILE_SIZE
+        self.boundary()
 
     # enlarges image to take up half the screen
     def enlarge(self):
@@ -77,7 +93,7 @@ class Game_Class(object):
         self.rect = self.image.get_rect()
         self.x = self.backupCoords[0]
         self.y = self.backupCoords[1]
-        self.update
+        self.update()
 
     # sets up groups
     def setup_groups(self, base, extra):
@@ -103,11 +119,11 @@ class Game_Class(object):
 # Obtacle superclass
 class Obstacle(Game_Class, pg.sprite.Sprite):
     # KEYWORDS AND CLASS VARIABLES
-    spr_type = "obstacle"
     
     # imgnum will be an index in the corresponding 
     # image direcory list found above
     def __init__(self, game, x, y, imgNum):
+        self.spr_type = "obstacle"
         self.groups = game.obs_sprites
         pg.sprite.Sprite.__init__(self, self.groups)
         Game_Class.__init__(self, game, x, y)
@@ -120,7 +136,23 @@ class Obstacle(Game_Class, pg.sprite.Sprite):
         self.placeAtTile()
         self.boundary()
         self.update()
+        self.curHealth = self.maxHealth
+        self.bumpCount = 0
 
+    # determines an attack
+    def attack(self):
+        return self.hand
+
+    # imcrements bumpCount if obstacle was bumped
+    def bumped(self):
+        # turns the obstacle hostile if bumped too many times
+        if self.bumpCount == 1:
+            self.spr_type = "mob"
+            self.bumpCount + 1
+        else:
+            self.bumpCount += 1
+
+    # flips the image over it's y axis to make the scene more diverse
     def flipImage(self):
         amount = randint(0, 10)
         for i in range(amount):
@@ -129,8 +161,7 @@ class Obstacle(Game_Class, pg.sprite.Sprite):
     # creates object bounds
     def boundary(self):
         # bounds for actor interaction
-        self.bounds = {'c':(self.x, self.y)}
-        
+        self.bounds = {'c':(self.x, self.y)}        
 
     ############################################################################
         
@@ -186,7 +217,6 @@ class Actor(Game_Class, pg.sprite.Sprite):
         self.name = name
         # creates initial boundaries
         self.boundary()
-        self.living = True
         try:
             # actor health at given time
             self.curHealth = self.maxHealth
@@ -249,6 +279,9 @@ class Actor(Game_Class, pg.sprite.Sprite):
                                  (sprite.spr_type == "exit"):
                                 self.game.setRoom()
                                 retVar = False
+                            elif sprite.spr_type == "obstacle":
+                                sprite.bumped()
+                                retVar = False
                             else:
                                 retVar = False
         return retVar
@@ -280,14 +313,6 @@ class Actor(Game_Class, pg.sprite.Sprite):
         else:
             return "I healed up a bit."
 
-    # takes damage
-    def takeDamage(self, amount):
-        self.curHealth -= amount
-        if self.curHealth <= 0:
-            self.living = False
-            self.dead()
-        return self.living
-
     # MAGIC METHODS
     
     # returns the sprite's name if called to print
@@ -295,10 +320,6 @@ class Actor(Game_Class, pg.sprite.Sprite):
         return "{}_{}".format(self.spr_type, self.name)
 
     # ABSTRACT METHODS
-
-    # action for dying
-    def dead(self):
-        raise NotImplementedError("{} needs dead method.".format(self))
     
     # sets or adds levels depending on the actor
     def levelUp(self):
@@ -345,12 +366,6 @@ class Monster(Actor):
         attack = randint(0,2)
         image = BUT_IMG_LIST[attack]
         return attacks[attack]
-
-    # action for dying
-    def dead(self):
-        self.x = 9001
-        self.y = 9001
-        self.update()
 
 ###################################################################################################
 
