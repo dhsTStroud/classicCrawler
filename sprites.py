@@ -167,10 +167,10 @@ class Obstacle(Game_Class, pg.sprite.Sprite):
     # determines how many, if any, health potions the player recieves for
     # killing this mob
     def loot(self):
-        # 96% chance to give no health potions
-        chance = [0 for i in range(96)]
-        # 3% chance to give 1 health potion
-        chance += [1 for i in range(3)]
+        # 90% chance to give no health potions
+        chance = [0 for i in range(90)]
+        # 10% chance to give 1 health potion
+        chance += [1 for i in range(10)]
 
         return chance[randint(0, len(chance)-1)]
 
