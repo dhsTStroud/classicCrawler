@@ -1,6 +1,0 @@
-Encounters
-	Attack or Defend
-UI
-	Inventory
-Controller
-Levels
