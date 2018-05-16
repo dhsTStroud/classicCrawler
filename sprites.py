@@ -119,7 +119,7 @@ class Game_Class(object):
 # Obtacle superclass
 class Obstacle(Game_Class, pg.sprite.Sprite):
     # KEYWORDS AND CLASS VARIABLES
-    self.score = 0
+    score = 0
     
     # imgnum will be an index in the corresponding 
     # image direcory list found above
@@ -338,6 +338,7 @@ class Actor(Game_Class, pg.sprite.Sprite):
 class Monster(Actor):
     # KEYWORDS AND CLASS VARIABLES
     spr_type = "mob"
+    enemy = True
     enemies = "player"
     
     # image should be an integer refering to the respective image list above
@@ -346,7 +347,7 @@ class Monster(Actor):
         # adds self to game.mob_sprites sprite group
         self.temp_groups = game.mob_sprites
         Actor.__init__(self, game, x, y, name, self.temp_groups)
-        self.score = self.maxHealth + 25
+        self.score = self.maxHealth * 2
         # loads respective image from image list
         if (slime == True):
             self.slime = slime
