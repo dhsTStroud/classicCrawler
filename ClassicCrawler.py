@@ -99,6 +99,7 @@ class Game(object):
     def setRoom(self):
         self.clearRoom()
         self.roomLevel += 1
+        if 
         # starting area is grass
         if self.roomLevel == 1:
             self.currentRoom = Room_Grass(self, (0,6))
@@ -237,6 +238,7 @@ class Game(object):
             sleep(2)
             self.deathUI()
         elif (not actor.living) and (self.player.living):
+            self.player.addScore(actor.score)
             # draws the battle one last time
             # to let the player know the enemy has run out of health
             self.drawBattle()

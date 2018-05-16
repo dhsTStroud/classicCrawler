@@ -20,10 +20,15 @@ class Actor_Player(Actor):
     maxHealth = 100
     
     def __init__(self, game, x, y):
+        self.score = 0
         self.healthPotions = 3
         # creates bounding box for sprite
         self.rect = self.image.get_rect()
         Actor.__init__(self, game, x, y, self.name)
+
+    # changes score by given number
+    def addScore(self, amount):
+        self.score += amount
 
     # removes a potion when called
     def drinkHealthPotion(self):
