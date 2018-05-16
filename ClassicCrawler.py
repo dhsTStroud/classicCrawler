@@ -143,7 +143,7 @@ class Game(object):
 
     # creates the default map UI
     def mapUI(self):
-        self.status = deepcopy(STATUS)
+        self.status[2] = " "
         self.atScreen = "map"
         self.inBattle = False
         self.drawMenuBackground()
@@ -200,7 +200,8 @@ class Game(object):
         self.status[6] = "Enemy Kill Multiplier * Score: ({} * {}) = {}".format(\
             enKillMult, score2, score3)
         self.status[7] = "You recieve a final score of {}".format(score3)
-        self.status[9] = "Press START below to play again!"
+        self.status[8] = " "
+        self.status[10] = "Press START below to play again!"
 
     # draws statuses to title or death screens
     def drawStatus(self, loc = FULL_STATUS_LOC, actor = None):
@@ -472,7 +473,7 @@ class Game(object):
                        "through an endless" + \
                        " series of rooms!", "Going through an exit costs you" + \
                        " a toll of 50 points, so be absolutely sure you're", \
-                       " ready to advance, cause there's no going back.",
+                       "ready to advance, cause there's no going back.",
                        " ", \
                        "Press the start button below to play the game."]
         self.run()
